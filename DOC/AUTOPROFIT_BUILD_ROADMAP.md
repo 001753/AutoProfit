@@ -1,8 +1,8 @@
 # AUTOPROFIT — BUILD ROADMAP OPERASIONAL
 
-**Versi:** 1.2
+**Versi:** 1.3
 **Tanggal penyusunan:** 2026-08-11  
-**Status:** Execution roadmap — diturunkan dari `DOC/AutoProfit_PRD_Master_Rev5.md`  
+**Status:** Execution roadmap — diturunkan dari `DOC/AutoProfit_PRD_Master_Rev5.md` dan Implementation Addendum Rev 5.1  
 **Bahasa kerja:** Bahasa Indonesia; nama teknis, endpoint, event, dan status mengikuti PRD  
 **Tujuan:** Membuat seluruh sistem AutoProfit secara bertahap, terintegrasi, dapat diverifikasi, dan dapat dikerjakan oleh Replit AI tanpa phase raksasa.
 
@@ -39,7 +39,8 @@ Sebelum mengerjakan unit pertama, Replit AI wajib membaca bagian berikut:
 4. Bagian 127–134 — adapter deployment shared hosting, queue Postgres, backup, monitoring, environment, aturan “Complete”.
 5. Bagian 134–140 — DoC Orders, Inventory, Accounting, Marketplace, Auth/Tenant, Dashboard, gate antar phase.
 6. Bagian 142–149 — realita API marketplace dan resilience lima tahun.
-7. Bagian 150–164 — reachability, PWA, onboarding, raw payload replay, ADR, portability, continuity, dan revisi phase terbaru.
+7. Bagian 150–171 — reachability, beachhead, market validation, moat, PWA,
+   onboarding, raw payload replay, ADR, portability, continuity, dan revisi phase terbaru.
 
 ### Aturan prioritas keputusan
 
@@ -49,6 +50,16 @@ Sebelum mengerjakan unit pertama, Replit AI wajib membaca bagian berikut:
 - Shared hosting adalah target deployment awal. Semua queue, cache, storage, realtime, lock, dan notification wajib melalui adapter.
 - WhatsApp P0 disiapkan secara arsitektural sejak Phase 0 dan boleh dikirim setelah dashboard summary tersedia; WhatsApp P1/P2 menunggu gate-nya.
 - Cloud migration bukan phase fitur yang dipaksakan; ia dijalankan ketika threshold PRD Bagian 129.1 tercapai.
+- Beachhead awal: seller fashion dan aksesoris lokal di Shopee dan/atau TikTok Shop,
+  sekitar 300–3.000 order/bulan, puluhan–ratusan SKU aktif, dan tim 2–10 orang.
+  Fokus ini berlaku untuk validasi, onboarding, contoh UX, dan template awal;
+  arsitektur tetap generic/extensible.
+- Commercial Validation & Moat Track C0–C4 berjalan paralel dengan P00–P24.
+  Track ini menambah market gate, bukan Phase 26, dan tidak menggantikan
+  technical gate.
+- P24/GA membutuhkan market evidence dari bisnis nyata: first value, data
+  coverage, exception visibility, trust, time saved, weekly usage, retention,
+  dan willingness to pay.
 
 ### Otoritas dokumen dan presedensi subphase
 
@@ -267,6 +278,125 @@ mengikuti blueprint canonical.
 
 P25 dapat mulai lebih awal sebagai persiapan, tetapi cutover production hanya boleh dilakukan saat trigger dan runbook migrasi lulus.
 
+### 6.1 COMMERCIAL VALIDATION & MOAT TRACK (C0–C4)
+
+Track ini adalah kontrol validasi pasar dan pembangunan moat yang berjalan paralel
+dengan phase teknis. Track ini tidak menambah Phase 26, tidak mengubah source of
+truth, dan tidak memberi izin untuk melewati technical gate.
+
+#### C0 — ICP dan problem baseline
+
+**Berjalan bersama:** P00–P01  
+**Fokus:** memastikan produk dibangun untuk masalah yang mahal pada beachhead,
+bukan untuk semua UMKM sekaligus.
+
+**Output wajib:**
+
+- definisi ICP/beachhead seller fashion dan aksesoris;
+- 15 wawancara target dan 5 observasi workflow nyata;
+- baseline waktu laporan, sumber data, settlement reconciliation, COGS,
+  discrepancy, dan keputusan yang tertunda;
+- interview guide yang menanyakan perilaku/kerugian nyata, bukan ketertarikan
+  verbal;
+- minimal 3 design partner yang bersedia memberi data atau mengikuti pilot;
+- hipotesis willingness to pay dan risiko segment.
+
+**Gate C0:** evidence tersimpan, minimal 3 calon pilot terkonfirmasi, dan keputusan
+scope beachhead dicatat. C0 tidak boleh dipakai untuk mengklaim
+product-market fit.
+
+#### C1 — First-value validation
+
+**Berjalan bersama:** P02 dan P06  
+**Fokus:** membuktikan pengguna dapat mencapai nilai pertama tanpa friksi manual.
+
+**Output wajib:** timestamp signup/import, first traceable number, onboarding live,
+data coverage, exception rate, self-serve completion, serta bukti bahwa angka
+pertama bukan data dummy.
+
+**Gate C1 (hipotesis awal):**
+
+- median import/sandbox sampai angka dapat ditelusuri ≤10 menit;
+- channel nyata menghasilkan data pertama ≤30 menit, di luar delay provider;
+- ≥80% pilot menyelesaikan onboarding tanpa bantuan teknis;
+- 100% data yang tidak termap terlihat sebagai exception;
+- silent loss = 0.
+
+#### C2 — Pilot commerce dan profit
+
+**Berjalan bersama:** P07–P14  
+**Fokus:** membuktikan pekerjaan commerce dan finansial nyata selama minimal
+30 hari.
+
+**Output wajib:**
+
+- minimal 3 bisnis nyata;
+- minimal 1 connector marketplace nyata dan 1 jalur import resmi;
+- order-to-profit traceability;
+- COGS completeness dan pemisahan estimated/actual;
+- settlement discrepancy dengan alasan/status;
+- waktu laporan/reconciliation dibanding baseline;
+- bukti tiap pilot memakai sistem untuk melihat profit, stok, settlement,
+  memperbaiki COGS, dan mengambil keputusan pembelian/harga.
+
+**Gate C2:** coverage order unified schema ≥95% pada beachhead, COGS terverifikasi
+≥90% setelah onboarding, source reference angka profit 100%, pengurangan waktu
+minimal 50% atau ≥4 jam/minggu, dan tidak ada silent loss. Semua data gagal
+dipetakan harus terlihat sebagai exception yang dapat ditindaklanjuti.
+
+#### C3 — Retention dan monetization validation
+
+**Berjalan bersama:** P16, P21, dan P22  
+**Fokus:** membuktikan produk menjadi kebiasaan kerja dan nilai berhubungan dengan
+keputusan yang dibantu, bukan sekadar fitur yang pernah dibuka.
+
+**Output wajib:** weekly usage, repeated action, active days/week,
+dashboard-to-action, alert-to-resolution, retention 8 minggu, usage-to-value,
+dan willingness to pay.
+
+**Gate C3 (hipotesis awal):** ≥70% cohort pilot aktif setiap minggu, retention
+8 minggu ≥50%, dan minimal 2 dari 3 pilot bersedia membayar atau menandatangani
+komitmen berbayar. Signup, koneksi channel, jumlah fitur, pertanyaan AI, dan
+jumlah event analytics bukan pengganti evidence ini.
+
+#### C4 — GA market gate
+
+**Berjalan bersama:** P24  
+**Fokus:** keputusan objektif lanjutkan, persempit, atau pivot sebelum GA.
+
+**Output wajib:** minimal 3 profil bisnis nyata sesuai PRD, evidence nilai bisnis,
+known limitations, support readiness, paid conversion evidence, kualitas data,
+trust/source reference, dan keputusan segment.
+
+**Gate C4:** P24 tidak boleh menyatakan GA bila market evidence belum tersedia,
+meskipun technical gate lulus.
+
+- **Lanjutkan/perluas** bila minimal 2 dari 3 pilot weekly active, angka dipercaya
+  dan traceable, reconciliation membaik, discrepancy dapat ditemukan, sebagian
+  pilot bersedia membayar, dan coverage tidak memiliki blocker besar.
+- **Persempit** bila dashboard disukai tetapi tidak memicu tindakan, onboarding
+  bergantung pada bantuan manual, profit tidak dipercaya karena COGS, atau
+  exception terlalu tinggi.
+- **Pivot** bila pain utama bukan profit/reconciliation, kebutuhan terbesar adalah
+  order operations, willingness to pay rendah, atau segmen lain terbukti lebih kuat.
+
+#### Moat instrumentation lintas C0–C4
+
+Phase yang relevan wajib mengukur dan menyimpan:
+
+- connector mapping coverage, unknown field, correction, version, replay
+  consistency, dan waktu pemulihan perubahan API;
+- COGS completeness, umur COGS, estimated-vs-actual profit, serta keputusan
+  pembelian yang memakai costing;
+- auto-match, exception, resolution time, discrepancy rupiah, duplicate
+  settlement, journal correction, dan auditability;
+- weekly active business, active days, dashboard-to-action, alert-to-resolution,
+  return-after-exception, dan keputusan bisnis yang dibantu;
+- source reference, audit sensitif, exportability, raw payload replay, error
+  visibility, dan tidak adanya data deletion demi tampilan laporan.
+
+Metric tersebut adalah evidence operasional dan market gate, bukan vanity analytics.
+
 ---
 
 # 7. RINCIAN PHASE — RINGKASAN OPERASIONAL
@@ -289,6 +419,9 @@ blueprint tersebut mengalahkan ringkasan ini.
 - Template PR/subphase, checklist DoC, dan `docs/adr/`.
 - ADR awal minimal: shared hosting, Postgres queue, UUID, SSE/polling, storage adapter, boundary UI/API/domain.
 - `docs/runbook/` dengan template incident, restore, credential rotation, dan deployment.
+- Artefak C0: ICP beachhead, interview guide, baseline worksheet, daftar design
+  partner, dan hipotesis willingness to pay. Ini adalah validasi produk, bukan
+  fitur bisnis yang diselundupkan ke P00.
 
 **Acceptance**
 
@@ -1012,7 +1145,12 @@ Ini bukan tempat menambal modul yang belum selesai. P24 hanya melakukan hardenin
 
 **Gate P24:** all PRD P0 DoC 134–139, marketplace 137/148, testing 120,
 NFR 119/128, reachability target evidence, continuity artifacts, privacy/
-data-governance evidence, dan tidak ada unresolved critical/high finding.
+data-governance evidence, **C4 market gate**, dan tidak ada unresolved
+critical/high finding. C4 wajib menyertakan minimal 3 bisnis nyata, first-value
+evidence, data coverage/exception evidence, weekly usage/retention, time saved,
+source-reference/trust evidence, support readiness, dan paid conversion
+evidence. Tanpa evidence tersebut, status GA adalah `BLOCKED` walaupun technical
+gate lulus.
 Paid billing hanya boleh disebut enabled bila provider dipilih, webhook
 signature/idempotency tervalidasi, mapping entitlement-to-invoice dan
 reconciliation terbukti; tanpa provider, yang boleh dinyatakan Complete hanya
@@ -1069,6 +1207,9 @@ Gate ini dijalankan berulang, bukan hanya pada P24:
 | Auditability | Setiap mutation sensitif | actor, source, before/after, reference, timestamp |
 | UX completeness | Setiap UI subphase | loading, empty, error, success, partial, mobile, keyboard |
 | Operational readiness | Setiap external integration | last sync, counts, failure reason, retry, impact |
+| Market validation | C0–C4 sesuai dependency phase | ICP/problem evidence, first value, coverage, exception, time saved, weekly usage, retention, willingness to pay |
+| Data honesty / trust | Setiap phase yang menghasilkan angka atau menerima payload | source reference 100%, estimated-vs-actual COGS, raw replay, export, visible exception, silent loss 0 |
+| Moat instrumentation | P07–P16, P21–P24 | mapping/replay, costing quality, reconciliation resolution, daily habit, decision-assisted evidence |
 
 ---
 
@@ -1193,5 +1334,6 @@ palsu. Gunakan sandbox/mock contract hanya untuk testing dan tandai jelas.
 | Multi-business, multi-currency, tax, public API | P23 |
 | QA, load, security, UAT, GA | P24 |
 | Cloud migration and long-term operational transition | P25 |
+| ICP, problem validation, first value, pilot, retention, monetization, market gate, moat | C0–C4 paralel P00–P24 |
 
 Dengan mapping ini, seluruh modul yang disebut pada Phase Build PRD 103/140/163 memiliki lokasi implementasi, dependency, dan gate yang eksplisit.

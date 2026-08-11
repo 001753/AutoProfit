@@ -2969,3 +2969,170 @@ tersendiri):
 ---
 
 *AutoProfit PRD — Revisi 5. Menambahkan strategi reachability (WhatsApp, PWA, onboarding self-serve, tier gratis) dan ketahanan 10 tahun di luar lapisan API marketplace (raw payload replay, ekosistem connector, ADR, siklus upgrade, data portability, continuity plan) di atas fondasi Rev 3 (build-ready), Rev 4 (deploy-ready, completion-enforced), dan Part V (5-year API resilience).*
+
+---
+
+# IMPLEMENTATION ADDENDUM — REV 5.1
+# MARKET VALIDATION, BEACHHEAD, DAN PRODUCT MOAT
+
+**Status:** Addendum requirement strategis — berlaku sebagai pelengkap Rev 5
+**Tujuan:** Memastikan AutoProfit dibangun untuk segmen yang benar, menyelesaikan masalah yang mahal, dipakai berulang, dan memperoleh keunggulan yang semakin kuat dari data serta workflow yang terbukti.
+**Batas:** Addendum ini tidak menambah Phase 26, tidak mengubah domain menjadi khusus fashion, dan tidak menggantikan technical gate. Ia menambahkan market gate dan evidence requirement lintas phase.
+
+## 165. STRATEGI BEACHHEAD DAN BATAS ARSITEKTUR
+
+### 165.1 Beachhead awal
+
+Validasi komersial awal harus fokus pada **seller fashion dan aksesoris lokal** yang:
+
+- berjualan di Shopee dan/atau TikTok Shop;
+- memiliki sekitar 300–3.000 order per bulan;
+- memiliki puluhan hingga ratusan SKU aktif, termasuk variasi ukuran, warna, atau model;
+- dikelola oleh tim kecil berisi 2–10 orang;
+- mengalami perbedaan antara omzet, saldo marketplace, dan uang yang diterima;
+- masih menyimpan COGS di spreadsheet atau memiliki COGS yang tidak lengkap;
+- terdampak retur, pembatalan, fee marketplace, dan biaya iklan;
+- sudah terlalu kompleks untuk spreadsheet, tetapi belum siap menggunakan ERP besar.
+
+Fashion dan aksesoris dipilih sebagai **beachhead**, bukan sebagai batas pasar permanen, karena kepadatan masalahnya tinggi: variasi SKU, risiko inventory, kebutuhan COGS per produk, retur, fee, multi-channel, serta keputusan stok dan pembelian yang cepat.
+
+Kategori F&B, beauty, elektronik, distributor, dan kategori lain tetap harus didukung oleh arsitektur generic/extensible. Ekspansi kategori dilakukan setelah market gate beachhead menghasilkan bukti yang cukup.
+
+### 165.2 Pemisahan strategi pasar dan desain teknis
+
+| Area | Keputusan |
+|---|---|
+| Arsitektur/domain/data model | Generic dan extensible; tidak boleh hard-code fashion |
+| Onboarding | Template pertama: Fashion & Aksesoris |
+| Copy dan UX awal | Bahasa serta contoh yang relevan dengan seller fashion |
+| COA/costing defaults | Template fashion; mapping tetap configurable |
+| Pilot dan validasi | Fokus seller fashion/aksesoris |
+| Ekspansi kategori | Setelah metric beachhead lulus dan keputusan segment dicatat |
+
+Template industri hanya mengatur default, progressive disclosure, dan contoh. Ia tidak boleh mengubah source of truth, tenant boundary, accounting invariant, atau connector contract.
+
+## 166. VALIDASI MASALAH DAN PILOT DATA NYATA
+
+### 166.1 Tahap C0 — Problem validation
+
+Sebelum produk dianggap siap diperluas dari beachhead:
+
+- dilakukan minimal **15 wawancara** dengan seller target;
+- dilakukan minimal **5 sesi observasi proses kerja nyata**, bukan wawancara saja;
+- minimal **3 seller** bersedia memberikan data historis atau mengikuti pilot;
+- setiap sesi menghasilkan baseline yang tercatat:
+  - waktu membuat laporan;
+  - sumber data yang digunakan;
+  - cara mencocokkan settlement dengan rekening bank;
+  - jumlah dan jenis discrepancy;
+  - cara menghitung COGS;
+  - keputusan yang tertunda karena data tidak tersedia.
+
+Pertanyaan validasi harus berfokus pada perilaku dan kerugian nyata, misalnya: kapan terakhir profit ternyata salah, berapa lama menutup laporan, bagaimana saldo marketplace dicocokkan ke bank, siapa yang mengerjakan, dan berapa keputusan pembelian tertunda karena stok tidak dipercaya. Ketertarikan verbal atau jumlah signup bukan evidence utama.
+
+### 166.2 Tahap C2 — Pilot commerce dan profit
+
+Pilot bukan demo. Setiap bisnis pilot harus menggunakan pekerjaan nyata selama minimal **30 hari** dan:
+
+- memakai minimal satu connector marketplace nyata dan satu jalur import resmi;
+- melihat profit dan menelusuri angka sampai sumbernya;
+- memeriksa stok;
+- mencocokkan settlement;
+- memperbaiki COGS;
+- mengambil setidaknya satu keputusan pembelian atau harga menggunakan data sistem.
+
+Semua data yang gagal dipetakan wajib tampil sebagai exception yang dapat ditindaklanjuti. Payload/order tidak boleh hilang diam-diam.
+
+## 167. MARKET GATE DAN TARGET VALIDASI
+
+Angka di bawah adalah **hipotesis target awal**, bukan klaim hasil. Setelah 3–5 pilot, baseline aktual boleh menggantikan target dengan keputusan yang terdokumentasi.
+
+| Area | Metrik | Target awal |
+|---|---|---:|
+| First value | Signup/import sampai angka yang dapat ditelusuri | Median ≤10 menit untuk import/sandbox |
+| Onboarding live | Sampai channel nyata menghasilkan data pertama | ≤30 menit, di luar delay approval provider |
+| Self-serve | Pilot menyelesaikan onboarding tanpa bantuan teknis | ≥80% |
+| Data coverage | Order terpetakan ke unified schema | ≥95% pada beachhead |
+| Data honesty | Data tidak termap ditampilkan sebagai exception | 100% terlihat |
+| Silent loss | Payload/order hilang tanpa error/exception | 0 |
+| COGS readiness | SKU aktif dengan COGS terverifikasi | ≥90% setelah onboarding |
+| Profit trust | Angka dashboard memiliki source reference | 100% |
+| Time saved | Pengurangan waktu laporan/reconciliation dari baseline | ≥50% atau ≥4 jam/minggu |
+| Reconciliation | Discrepancy memiliki alasan/status yang dapat ditelusuri | 100% |
+| Weekly usage | Bisnis pilot aktif setiap minggu | ≥70% cohort |
+| Retention | Bisnis aktif setelah 8 minggu | Target awal ≥50% |
+| Willingness to pay | Pilot bersedia membayar/menandatangani komitmen berbayar | ≥2 dari 3 pilot |
+
+Metrik yang **tidak boleh** dipakai sebagai bukti utama: signup, jumlah koneksi marketplace, jumlah halaman/fitur, jumlah pertanyaan AI, jumlah event analytics, atau volume import tanpa ukuran kualitas hasil. North Star tetap **meaningful business decisions assisted**, dengan evidence tindakan dan hasilnya.
+
+## 168. MOAT YANG DIBANGUN DARI AKURASI, HISTORI, WORKFLOW, DAN TRUST
+
+Moat AutoProfit tidak boleh bergantung pada jumlah fitur atau lock-in paksa. Ia dibangun dari:
+
+### 168.1 Normalized commerce dan settlement dataset
+
+Connector harus mengumpulkan metadata terstruktur mengenai format order, fee, shipping, settlement, return, adjustment, ads fee, status, perubahan schema, error, dan edge case.
+
+Metric operasional yang perlu tersedia: mapping coverage, jumlah unknown field, mapping correction, waktu pemulihan setelah API berubah, jumlah payload yang dapat di-replay, konsistensi hasil replay, dan jumlah mapping version yang telah terbukti pada data nyata.
+
+### 168.2 Costing dan COGS intelligence
+
+Sistem membantu meningkatkan kualitas COGS, bukan sekadar membuat kolom terlihat lengkap. Metric: coverage COGS, umur data, SKU yang masih memakai estimasi, selisih estimated vs actual profit, waktu memperbaiki COGS, dan keputusan pembelian yang menggunakan costing.
+
+**Aturan keras:** estimated COGS wajib dibedakan jelas dari actual COGS. Sistem tidak boleh mengisi angka estimasi secara diam-diam demi membuat profit terlihat lengkap.
+
+### 168.3 Reconciliation workflow
+
+Nilai moat bukan sekadar import settlement, tetapi kemampuan menjawab mengapa uang yang diterima berbeda dari yang seharusnya. Metric: auto-match rate, exception rate, median resolution time, discrepancy yang ditemukan, nilai rupiah yang dijelaskan, duplicate settlement, journal correction, dan resolution yang dapat diaudit.
+
+### 168.4 Daily operating habit
+
+Loop penggunaan yang ingin dibangun:
+
+1. cek Business Snapshot;
+2. cek stok rendah;
+3. cek order bermasalah;
+4. cek settlement exception;
+5. cek profit per channel;
+6. menyetujui atau menindaklanjuti rekomendasi.
+
+Metric: weekly active business, hari aktif per minggu, dashboard-to-action conversion, alert-to-resolution rate, return setelah exception, dan jumlah keputusan bisnis yang dibantu sistem.
+
+### 168.5 Trust sebagai moat
+
+Setiap angka harus memiliki source reference; perubahan sensitif harus diaudit; user dapat mengekspor data; raw payload dapat di-replay; error ditampilkan jelas; data tidak dihapus hanya agar laporan terlihat baik. Trust dibangun melalui transparansi dan portability, bukan penyanderaan data.
+
+## 169. HUBUNGAN MARKET GATE DENGAN TECHNICAL GATE
+
+Market gate tidak menggantikan Definition of Done/Complete teknis:
+
+- modul accounting dapat lulus invariant debit=credit tanpa berarti produk telah membuktikan nilai bisnis;
+- connector dapat lulus contract fixture tanpa berarti capability production aktif tanpa credential/approval;
+- entitlement dan metering dapat Complete tanpa provider, tetapi paid collection tetap `BLOCKED` sampai provider dan reconciliation terbukti;
+- GA tidak boleh diklaim hanya karena seluruh halaman dan test teknis lulus.
+
+P24/GA wajib memiliki market evidence: minimal tiga bisnis nyata yang sesuai beachhead/persona, bukti time-to-value, data coverage, penggunaan berulang, problem resolution, known limitation, support readiness, dan evidence willingness to pay.
+
+## 170. KEPUTUSAN SETELAH PILOT
+
+### 170.1 Lanjutkan dan perluas
+
+Dipilih bila minimal 2 dari 3 pilot memakai produk setiap minggu, angka utama dipercaya dan dapat ditelusuri, waktu reconciliation berkurang signifikan, discrepancy baru dapat ditemukan, sebagian pilot bersedia membayar, dan tidak ada blocker besar pada data coverage.
+
+### 170.2 Persempit kembali
+
+Dipilih bila user menyukai dashboard tetapi tidak melakukan tindakan, onboarding hanya berhasil dengan bantuan manual, profit tidak dipercaya karena COGS tidak lengkap, connector menghasilkan terlalu banyak exception, atau pemakaian hanya terjadi saat diminta tim AutoProfit.
+
+### 170.3 Pivot
+
+Dipertimbangkan bila masalah utama bukan profit/reconciliation, seller lebih membutuhkan order operations, willingness to pay rendah walau pain diakui, fashion tidak memiliki pain yang cukup kuat, atau nilai terbesar terbukti ada pada segmen lain seperti distributor, beauty, atau F&B.
+
+Setiap keputusan harus menyimpan evidence, perubahan hipotesis, dampak terhadap scope, dan keputusan segment berikutnya. Tidak boleh memperluas kategori hanya karena permintaan fitur tanpa evidence penggunaan dan nilai.
+
+## 171. REVISI REQUIREMENT YANG BERLAKU
+
+1. **Beachhead fashion/aksesoris** menjadi fokus validasi, onboarding, contoh UX, template COA/costing, dan pilot awal; arsitektur tetap generic.
+2. **Commercial Validation & Moat Track C0–C4** berjalan paralel dengan Phase P00–P24; tidak ada Phase 26.
+3. **100% data honesty, 0 silent loss, source reference pada angka, estimated-vs-actual COGS, raw payload replay, export, dan audit** menjadi requirement lintas domain.
+4. **P24 GA** memerlukan market gate selain technical/security/UAT gate.
+5. Angka target Bagian 167 adalah hipotesis yang harus diukur, bukan data yang boleh di-hardcode atau diklaim sudah terbukti.
