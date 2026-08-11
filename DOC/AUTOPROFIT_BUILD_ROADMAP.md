@@ -1,6 +1,6 @@
 # AUTOPROFIT — BUILD ROADMAP OPERASIONAL
 
-**Versi:** 1.0  
+**Versi:** 1.1
 **Tanggal penyusunan:** 2026-08-11  
 **Status:** Execution roadmap — diturunkan dari `DOC/AutoProfit_PRD_Master_Rev5.md`  
 **Bahasa kerja:** Bahasa Indonesia; nama teknis, endpoint, event, dan status mengikuti PRD  
@@ -49,6 +49,56 @@ Sebelum mengerjakan unit pertama, Replit AI wajib membaca bagian berikut:
 - Shared hosting adalah target deployment awal. Semua queue, cache, storage, realtime, lock, dan notification wajib melalui adapter.
 - WhatsApp P0 disiapkan secara arsitektural sejak Phase 0 dan boleh dikirim setelah dashboard summary tersedia; WhatsApp P1/P2 menunggu gate-nya.
 - Cloud migration bukan phase fitur yang dipaksakan; ia dijalankan ketika threshold PRD Bagian 129.1 tercapai.
+
+### Otoritas dokumen dan presedensi subphase
+
+Tiga dokumen berikut memiliki peran berbeda dan tidak boleh diperlakukan
+sebagai dua daftar task yang setara:
+
+1. `DOC/AutoProfit_PRD_Master_Rev5.md` adalah **sumber kebenaran produk dan
+   requirement**. Jika ada konflik requirement, Rev 5 > Rev 4 > Rev 3.
+2. `DOC/AUTOPROFIT_EXECUTION_PHASES_REV5.md` adalah **rujukan tunggal untuk
+   breakdown `PXX.Y`, klasifikasi unit kerja, acceptance proof, dan
+   Definition of Complete per subphase**.
+3. Dokumen ini adalah **rujukan operasional untuk urutan phase, dependency
+   global, change control, checkpoint ide, commit, dan push GitHub**.
+
+Jika nama atau jumlah subphase pada ringkasan roadmap berbeda dari blueprint,
+ikuti blueprint dan jangan menyatakan phase `Complete` berdasarkan ringkasan
+roadmap saja. Perubahan terhadap breakdown wajib diperbarui di kedua dokumen
+sebelum dieksekusi; tidak boleh ada dua versi subphase yang berjalan paralel.
+
+### Aturan readiness dependensi eksternal
+
+Credential, approval, sandbox, legal review, atau payment provider yang belum
+tersedia adalah status `BLOCKED`, bukan izin untuk membuat integrasi palsu.
+Core yang provider-agnostic boleh selesai dan diuji dengan contract fixture,
+tetapi capability eksternal hanya boleh disebut `enabled` setelah ada bukti
+sandbox/production yang dapat diverifikasi. Untuk billing, entitlement dan
+metering wajib selesai tanpa provider; paid billing baru `Complete` bila
+provider dipilih, webhook tervalidasi, dan reconciliation terbukti.
+
+### Scorecard kesiapan roadmap setelah revisi
+
+Score ini menilai **kesiapan dokumen untuk dieksekusi**, bukan progress kode dan
+bukan jaminan bahwa sistem sudah terbangun:
+
+| Dimensi | Score | Bukti keputusan |
+|---|---:|---|
+| Traceability PRD → phase/subphase | 9.5/10 | Peta modul, DoC PRD, dan canonical execution blueprint |
+| Dependency dan urutan delivery | 9.5/10 | Graph dikoreksi; P15/P16, P17/P18, P19/P20 eksplisit |
+| Granularitas unit kerja | 9.5/10 | Blueprint menjadi satu-satunya otoritas `PXX.Y` |
+| Definition of Complete dan evidence | 9.5/10 | Checklist contract, migration, test, security, UX, ops |
+| Integrity, security, privacy | 9.0/10 | Tenant, reset, consent, PII, retention, audit, PDP evidence gate |
+| External dependency honesty | 9.5/10 | `BLOCKED` bila credential/provider/legal review belum tersedia |
+| Billing readiness | 9.0/10 | Entitlement/metering terpisah dari paid collection dan reconciliation |
+| Operability, continuity, dan release | 9.0/10 | Adapter, backup/restore, runbook, UAT, rollback, GA gate |
+| **Rata-rata** | **9.3/10** | Siap dijadikan baseline eksekusi dengan evidence per gate |
+
+Sisa risiko yang sengaja tidak disamarkan: availability provider marketplace,
+approval aplikasi eksternal, payment provider pilihan pengguna, legal review
+UU PDP, dan validasi reachability oleh minimal tiga bisnis nyata. Risiko tersebut
+menjadi dependency atau `BLOCKED`, bukan asumsi dan bukan mock.
 
 ---
 
@@ -197,14 +247,14 @@ P00 Delivery control & deployment skeleton
              └─ P13 Profit, cash & financial reports
                  └─ P14 Settlement & bank reconciliation
  P05 + P13 ────────────────────────────────┘
- P06 ── P15 Notification & automation
- P13 ── P16 Purchasing & supplier
- P13 + P15 ── P17 AI read-only copilot
- P17 + P15 ── P18 AI action layer & business memory
- P06 + P15 ── P19 WhatsApp P0
- P19 + P16 + P18 ── P20 WhatsApp approval/assistant
+ P06 ── P16 Notification & automation
+ P13 ── P15 Purchasing & supplier
+ P13 + P16 ── P17 AI read-only copilot
+ P17 + P15 + P16 + P12/P13 ── P18 AI action layer & business memory
+ P06 + P16 ── P19 WhatsApp P0
+ P19 + P17 + P18 + P15/P12 ── P20 WhatsApp approval/assistant
  P01 + P06 ── P21 Billing, plans & feature flags
- P06 + P13 + P15 + P17 ── P22 Analytics & advanced workspace
+ P06 + P13 + P16 + P17 ── P22 Analytics & advanced workspace
  P13 + P21 + P22 ── P23 Advanced finance, multi-business & public API
  P00–P23 ── P24 Security, performance, UAT & GA
  P24 + threshold Bagian 129.1 ── P25 Cloud migration
@@ -214,7 +264,12 @@ P25 dapat mulai lebih awal sebagai persiapan, tetapi cutover production hanya bo
 
 ---
 
-# 7. RINCIAN PHASE
+# 7. RINCIAN PHASE — RINGKASAN OPERASIONAL
+
+Rincian di bawah ini adalah ringkasan tujuan dan gate untuk pengendalian
+roadmap. Ia **bukan** daftar subphase canonical. Untuk task `PXX.Y`, gunakan
+`DOC/AUTOPROFIT_EXECUTION_PHASES_REV5.md`; jumlah dan nama subphase pada
+blueprint tersebut mengalahkan ringkasan ini.
 
 ## P00 — DELIVERY CONTROL DAN DEPLOYMENT SKELETON
 
@@ -289,24 +344,39 @@ P25 dapat mulai lebih awal sebagai persiapan, tetapi cutover production hanya bo
 
 **Acceptance:** query lintas tenant ditolak pada API, search, export, cache key, dan queue payload; tests eksplisit untuk kelima jalur.
 
-### P01.2 — Auth, password, refresh rotation, dan active sessions
+### P01.2 — Auth, password recovery, refresh rotation, dan active sessions
 
 - Signup/login/logout, bcrypt/argon2, access JWT 15 menit.
+- Password reset via email/token sekali pakai dengan expiry, generic response
+  untuk mencegah account enumeration, dan audit event. Token reset tidak boleh
+  dipakai ulang; reset password menginvalidasi sesi aktif.
 - Refresh token 30 hari, rotation, reuse detection, session invalidation.
 - Session list/revoke per device; password change invalidates all sessions.
-- Auth rate limit 20/min; default API rate limit 120/min.
+- Auth rate limit 20/min termasuk login dan reset password; brute-force
+  backoff/lockout yang dapat dipulihkan; default API rate limit 120/min.
 
-**Acceptance:** refresh token lama tidak dapat dipakai kembali; reuse menginvalidasi sesi user; rate limit test benar-benar 429.
+**Acceptance:** reset token expired atau reused ditolak, reset menginvalidasi
+sesi aktif, dan response tidak membocorkan keberadaan akun; refresh token lama
+tidak dapat dipakai kembali; reuse menginvalidasi sesi user; rate limit login
+dan reset benar-benar 429.
 
-### P01.3 — RBAC, permission middleware, dan audit
+### P01.3 — RBAC, permission middleware, audit, dan consent
 
 - Role Owner, Finance, Purchasing, Operations, Admin minimal; permission matrix.
 - Approve PO, post journal, export finance, manage channel, dan manage members.
 - Audit log immutable secara aplikasi; before/after, actor, IP, source.
+- Signup menyimpan persetujuan ToS dan Privacy Policy yang versioned, timestamp,
+  policy version, subject, dan source. Perubahan policy memiliki re-consent
+  flow; withdrawal consent menghentikan pemrosesan opsional tanpa menghapus
+  transaksi/journal yang wajib disimpan.
 
-**Acceptance:** setiap kombinasi role × critical permission menjadi negative/positive test; semua mutation sensitif memiliki audit.
+**Acceptance:** setiap kombinasi role × critical permission menjadi
+negative/positive test; semua mutation sensitif memiliki audit; reset token
+sekali pakai dan consent/re-consent memiliki negative test.
 
-**Gate P01:** DoC Bagian 138 100%, tenant isolation regression hijau, session/revoke E2E hijau, no critical dependency audit.  
+**Gate P01:** DoC Bagian 138 100%, tenant isolation regression hijau,
+password-reset/recovery E2E hijau, consent record/re-consent negative test
+hijau, session/revoke E2E hijau, no critical dependency audit.
 **Push:** `feat(phase-01): complete identity tenancy and authorization`.
 
 ---
@@ -819,7 +889,13 @@ P25 dapat mulai lebih awal sebagai persiapan, tetapi cutover production hanya bo
 - Transparent usage progress, upgrade/overage explanation, entitlement denial clear.
 - Flag rollout, tenant-level override audit, safe default.
 
-**Gate:** entitlement matrix tests, period reset idempotent, overage does not stop order, no plan bypass via API, billing event audit.  
+**Billing status:** entitlement/metering/trial dapat `Complete` tanpa provider.
+Paid collection tetap `BLOCKED` sampai provider dipilih dan terhubung, webhook
+signature/idempotency tervalidasi, invoice/charge state dapat direkonsiliasi,
+dan failure/refund flow diuji. Jangan mengarang provider, invoice, atau charge.
+
+**Gate:** entitlement matrix tests, period reset idempotent, overage does not
+stop order, no plan bypass via API, billing event audit.
 **Push:** `feat(phase-21): complete billing metering and feature flags`.
 
 ---
@@ -896,6 +972,11 @@ Ini bukan tempat menambal modul yang belum selesai. P24 hanya melakukan hardenin
 - Backup restore rehearsal; shared-hosting RPO/RTO truth displayed in Trust/ToS.
 - `/health`, external uptime monitor plan, Sentry/error tracking plan, alert routing.
 - Runbooks: restore, rotation, connector suspension, incident, deployment, rollback.
+- Privacy/data-governance evidence: PII inventory and purpose, retention/legal
+  hold policy, consent/withdrawal, access/correction/deletion request lifecycle
+  untuk data yang boleh dihapus, immutable audit retention, dan legal/product
+  review sebelum klaim kepatuhan publik. Data transaksi/journal tidak boleh
+  dihapus untuk memenuhi request bila kewajiban retensi mengharuskannya.
 
 ### P24.4 — UAT and GA
 
@@ -904,7 +985,9 @@ Ini bukan tempat menambal modul yang belum selesai. P24 hanya melakukan hardenin
 - Release notes, known limits, onboarding/support materials, rollback decision.
 - GA only after all P0 gates and business sign-off.
 
-**Gate P24:** all PRD P0 DoC 134–139, marketplace 137/148, testing 120, NFR 119/128, reachability target evidence, continuity artifacts.  
+**Gate P24:** all PRD P0 DoC 134–139, marketplace 137/148, testing 120,
+NFR 119/128, reachability target evidence, continuity artifacts, privacy/
+data-governance evidence, dan tidak ada unresolved critical/high finding.
 **Push:** `feat(phase-24): complete hardening and GA readiness`.
 
 ---
@@ -1026,7 +1109,9 @@ Sebelum subphase diberi status Complete, Replit AI wajib mencentang:
 Untuk setiap task baru, gunakan prompt operasional ini:
 
 ```text
-Kerjakan hanya [PXX.Y — nama subphase] pada DOC/AUTOPROFIT_BUILD_ROADMAP.md.
+Kerjakan hanya [PXX.Y — nama subphase] pada
+DOC/AUTOPROFIT_EXECUTION_PHASES_REV5.md. Gunakan BUILD_ROADMAP untuk urutan,
+dependency, change-control, checkpoint, dan protokol GitHub.
 
 Baca PRD Master bagian [nomor bagian] dan cek kode terbaru sebelum mengubah apa pun.
 Jangan mengerjakan subphase lain. Pertahankan stack dan struktur yang ada.

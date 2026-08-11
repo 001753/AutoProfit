@@ -1,5 +1,6 @@
 # AUTOPROFIT — BLUEPRINT PHASE EKSEKUSI REV 5
 
+**Versi:** 1.1
 **Tanggal:** 2026-08-11  
 **Status:** Master execution plan untuk pembangunan bertahap  
 **Bahasa:** Bahasa Indonesia; nama teknis mengikuti PRD  
@@ -10,6 +11,21 @@
 > untuk satu eksekusi Replit AI. Dokumen ini tidak menggantikan PRD. Jika ada
 > konflik, berlaku Rev 5 > Rev 4 > Rev 3, lalu keputusan eksplisit yang
 > tercatat dalam ADR.
+
+### 0.1 Otoritas breakdown dan aturan status
+
+Dokumen ini adalah **satu-satunya rujukan eksekusi untuk daftar `PXX.Y`,
+klasifikasi unit kerja, acceptance proof, dan Definition of Complete per
+subphase**. `DOC/AUTOPROFIT_BUILD_ROADMAP.md` mengatur urutan phase, dependency
+global, change control, checkpoint ide, commit, dan push GitHub; ia bukan daftar
+subphase alternatif.
+
+Jika ringkasan, prompt lama, atau catatan lain menyebut breakdown yang berbeda,
+ikuti dokumen ini dan catat konflik tersebut sebagai ADR sebelum coding. Phase
+atau subphase tetap `BLOCKED` bila credential, approval, sandbox, legal review,
+atau provider eksternal belum tersedia. Contract fixture boleh dipakai untuk
+menguji core provider-agnostic, tetapi tidak boleh dipakai untuk mengklaim
+capability eksternal aktif.
 
 ---
 
@@ -180,8 +196,10 @@ P05 + P07..P11 ── P12 Accounting ── P13 Profit/Cash/Reports
                                       ├─ P14 Reconciliation
                                       └─ P15 Purchasing
 P06 ── P16 Notification/Automation
-P13 + P16 ── P17 AI Read-only ── P18 AI Actions/Memory
-P06 + P16 ── P19 WhatsApp P0 ── P20 WhatsApp P1/P2
+P13 + P16 ── P17 AI Read-only
+P17 + P15 + P16 + P12/P13 ── P18 AI Actions/Memory
+P06 + P16 ── P19 WhatsApp P0
+P19 + P17 + P18 + P15/P12 ── P20 WhatsApp P1/P2
 P01 + P06 ── P21 Billing/Metering/Flags
 P06 + P13 + P16 + P17 ── P22 Analytics/Workspace
 P13 + P21 + P22 ── P23 Advanced Finance/Public API
@@ -271,20 +289,29 @@ queue/lock/adapter boundary terbukti; ADR dan runbook awal ada.
 - **Proof:** seed dua kali tidak duplikat; role × critical permission matrix
   menjadi automated test; active org terlihat di session.
 
-### P01.3 — Signup, password, login, logout, refresh rotation (V)
+### P01.3 — Signup, password recovery, login, logout, refresh rotation (V)
 
-- **Output:** bcrypt/argon2, password policy, JWT access 15m, refresh 30d
-  rotation/reuse detection, logout.
-- **Proof:** refresh lama ditolak; reuse menginvalidasi seluruh sesi; auth rate
-  limit 20/min benar-benar 429; secret tidak masuk log.
+- **Output:** bcrypt/argon2, password policy, password reset via
+  single-use expiring email/token flow, generic response untuk mencegah account
+  enumeration, JWT access 15m, refresh 30d rotation/reuse detection, logout.
+- **Proof:** reset token expired/reused ditolak, reset menginvalidasi sesi
+  aktif, email/account enumeration tidak bocor, refresh lama ditolak; reuse
+  menginvalidasi seluruh sesi; auth rate limit 20/min untuk login dan reset
+  benar-benar 429; secret tidak masuk log.
 
-### P01.4 — Session management, RBAC middleware, immutable audit (V/I)
+### P01.4 — Session management, RBAC, audit, dan consent (V/I)
 
 - **Output:** daftar/revoke device, password-change invalidation, route/domain
-  authorization, audit before/after actor/IP/source.
+  authorization, audit before/after actor/IP/source; versioned ToS dan Privacy
+  Policy consent pada signup (timestamp, policy version, subject, source),
+  re-consent saat policy berubah, dan withdrawal untuk pemrosesan opsional.
 - **Proof:** revoke device lain menolak request berikutnya; setiap sensitive
-  mutation ter-audit; API bypass tidak mungkin.
-- **Gate P01:** P01 DoC 138, regression P00, security/dependency audit lulus.
+  mutation ter-audit; API bypass tidak mungkin; consent dapat dibuktikan,
+  re-consent wajib saat versi berubah, withdrawal menghentikan pemrosesan
+  opsional, dan transaksi/journal yang wajib retensi tidak dihapus.
+- **Gate P01:** P01 DoC 138, password recovery E2E, consent/re-consent
+  negative tests, tenant/RBAC regression, session/revoke E2E, dan
+  security/dependency audit lulus.
 - **Checkpoint/push:** ide khusus identity/tenant; commit
   `feat(phase-01): complete identity tenancy and authorization`; push GitHub.
 
@@ -933,6 +960,13 @@ connected. Core entitlement must work without inventing a provider.
   two business channels; API/UI/domain all call one entitlement service.
 - **Proof:** API cannot bypass UI; default deny for protected features; audit.
 
+**Billing readiness rule:** P21 memiliki dua status terpisah. `Entitlement /
+metering ready` wajib dapat selesai tanpa payment provider. `Paid collection
+enabled` tetap `BLOCKED` sampai provider dipilih dan terhubung melalui secret
+flow, webhook signature/idempotency tervalidasi, invoice/charge state dapat
+  direkonsiliasi, dan failure/refund policy diuji. Jangan membuat provider,
+invoice, atau charge palsu.
+
 ### P21.2 — Usage counters and billing period (V)
 
 - orders/month, channels, users, automation, AI usage; period reset; >80%
@@ -1048,14 +1082,20 @@ belum complete.
 - Dependency audit, SAST, auth/session/rate/PII/secret review, backup restore,
   `/health`, uptime/error tracking plan, alert routing, runbooks.
 - **Proof:** no critical/high unresolved in release scope; shared-hosting RPO/RTO
-  truth displayed.
+  truth displayed; privacy/data-governance evidence tersedia: PII inventory dan
+  purpose, retention/legal-hold policy, consent/withdrawal, access/correction/
+  deletion request lifecycle untuk data yang boleh dihapus, immutable audit
+  retention, dan legal/product review sebelum klaim kepatuhan publik.
 
 ### P24.5 — UAT, release candidate, GA decision (H)
 
 - At least three real-business profiles, mobile/browser/a11y smoke, release
   notes, known limits, support/onboarding material, rollback decision.
 - **Gate P24:** all PRD DoC 134–139, 137/148, NFR/testing/reachability/
-  continuity evidence; user sign-off.
+  continuity dan privacy/data-governance evidence; user sign-off. Paid billing
+  hanya boleh disebut enabled bila provider dipilih, webhook tervalidasi,
+  entitlement-to-invoice mapping dan reconciliation terbukti; tanpa provider,
+  hanya entitlement/metering/trial yang boleh dinyatakan Complete.
 - **Checkpoint/push:** ide khusus GA; commit
   `feat(phase-24): complete hardening and GA readiness`; push GitHub.
 

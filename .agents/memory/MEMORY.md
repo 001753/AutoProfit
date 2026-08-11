@@ -1,0 +1,1 @@
+- [Roadmap authority](roadmap-authority.md) — PRD owns requirements, blueprint owns subphases/DoC, roadmap owns delivery controls.

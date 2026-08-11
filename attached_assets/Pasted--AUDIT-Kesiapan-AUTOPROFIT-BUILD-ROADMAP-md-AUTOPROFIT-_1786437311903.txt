@@ -1,0 +1,125 @@
+# AUDIT — Kesiapan AUTOPROFIT_BUILD_ROADMAP.md & AUTOPROFIT_EXECUTION_PHASES_REV5.md
+
+**Auditor:** Claude (dokumen-level review)
+**Objek audit:** `AUTOPROFIT_BUILD_ROADMAP.md` (1084 baris) dan `AUTOPROFIT_EXECUTION_PHASES_REV5.md` (1310 baris)
+**Pertanyaan yang diaudit:** Apakah kedua dokumen ini, sebagaimana ditulis, benar-benar dapat menghasilkan sistem AutoProfit yang lengkap sesuai PRD — real work, no error, fully completed?
+
+---
+
+## 0. BLOCKER METODOLOGIS — HARUS DIBACA DULU
+
+**`DOC/AutoProfit_PRD_Master_Rev5.md` tidak ada dalam file yang diupload.** Kedua dokumen yang saya audit menyebut PRD itu berkali-kali sebagai *sumber kebenaran* dan mengutip puluhan nomor bagian spesifik (Bagian 102, 118.2, 120.2, 129.1, 134–140, 142–149, 150–164, dst.) sebagai rujukan wajib baca sebelum setiap phase.
+
+Konsekuensinya, saya **tidak bisa** memverifikasi:
+- Apakah isi Bagian-bagian tersebut benar-benar ada dan cocok dengan yang diklaim roadmap.
+- Apakah semua modul di PRD sudah terpetakan (klaim "tidak ada modul PRD yang tidak terpetakan" di P00.1 tidak bisa diverifikasi tanpa PRD).
+- Apakah nilai numerik yang dikutip (limit performa, threshold billing, SLA) sesuai PRD atau karangan turunan.
+
+Jadi audit ini **bukan** audit "roadmap vs PRD" yang sesungguhnya — ini audit **konsistensi internal + kelengkapan struktural** dari dua dokumen roadmap itu sendiri. Jika Anda ingin audit PRD-vs-roadmap yang sebenarnya, upload `AutoProfit_PRD_Master_Rev5.md` dan saya akan cross-check nomor bagian dan cakupan modul satu per satu.
+
+**Verdict atas pertanyaan literal "apakah sudah PASTI membangun sesuai PRD secara lengkap": TIDAK BISA DIJAWAB YA/TIDAK saat ini — bukan karena roadmap-nya buruk, tapi karena rujukan kebenarannya tidak tersedia untuk diperiksa.**
+
+Di bawah ini audit atas apa yang *bisa* diverifikasi.
+
+---
+
+## 1. TEMUAN KRITIS — BUG TERVERIFIKASI
+
+### 1.1 Diagram dependency di ROADMAP (Bagian 6) menukar label P15 ↔ P16
+
+Di `AUTOPROFIT_BUILD_ROADMAP.md` baris 199–210:
+
+```text
+P06 ── P15 Notification & automation
+P13 ── P16 Purchasing & supplier
+P13 + P15 ── P17 AI read-only copilot
+```
+
+Tapi di dokumen yang sama, judul phase eksplisit (baris 663 dan 685) dan tabel modul (Bagian 13, baris 1073–1074) menyatakan sebaliknya:
+
+- `P15 — PURCHASING, SUPPLIER, REORDER, DAN APPROVAL`
+- `P16 — NOTIFICATION CENTER DAN AUTOMATION ENGINE`
+- Tabel: "Purchasing, supplier, PO, reorder | P15", "Notifications, automation, audit, approvals | P16"
+- Dependency resmi P17 di baris 711 sendiri berbunyi **"Dependency: P06, P13, P16"** — bukan P15 seperti di diagram Bagian 6.
+
+**Ini kontradiksi internal yang terverifikasi**, bukan interpretasi. Siapa pun yang membaca diagram Bagian 6 tanpa membaca detail phase akan salah paham bahwa P15 = Notification dan P16 = Purchasing. `AUTOPROFIT_EXECUTION_PHASES_REV5.md` tidak punya bug ini — diagramnya (Bagian 4) sudah benar: `P06 ── P16 Notification/Automation`, `P13 + P16 ── P17`.
+
+**Rekomendasi:** perbaiki diagram Bagian 6 di ROADMAP agar cocok dengan detail phase dan dengan EXECUTION_PHASES_REV5.
+
+### 1.2 Tidak ada aturan presedensi eksplisit antara kedua dokumen saat subphase-nya berbeda
+
+- ROADMAP: P00 punya 3 subphase (P00.1–P00.3).
+- EXECUTION_PHASES_REV5: P00 punya 4 subphase (P00.1–P00.4), dengan pemecahan yang berbeda (mis. adapter/health dipisah dari toolchain/CI).
+- Pola yang sama berulang di P01–P06: ROADMAP konsisten 3 subphase per phase; EXECUTION_PHASES_REV5 konsisten 4 subphase per phase.
+
+Kedua dokumen sama-sama punya template prompt operasional di bagian akhir yang **merujuk ke dirinya sendiri** ("Kerjakan hanya [PXX.Y] pada DOC/AUTOPROFIT_BUILD_ROADMAP.md" vs "... dari DOC/AUTOPROFIT_EXECUTION_PHASES_REV5.md"). ROADMAP tidak pernah menyebut keberadaan EXECUTION_PHASES_REV5; EXECUTION_PHASES_REV5 menyebut ROADMAP hanya sebagai "aturan operasional" (proses git/checkpoint), bukan sebagai sumber breakdown subphase.
+
+Nomor phase (P00–P25), nama phase, gate, dan pesan commit **identik** di kedua dokumen — jadi ini bukan dua rencana yang bertentangan secara strategis, tapi dua breakdown subphase yang berbeda granularitasnya untuk phase yang sama, tanpa pernyataan eksplisit mana yang final.
+
+**Risiko nyata:** Replit AI (atau siapa pun yang mengeksekusi) bisa menyelesaikan "P00" menurut ROADMAP (3 subphase, dianggap Complete, di-push ke GitHub), lalu nanti dicek ulang terhadap EXECUTION_PHASES_REV5 yang menuntut subphase ke-4 (adapter/health terpisah) — dan status "Complete" jadi tidak valid, padahal sudah commit dan push.
+
+**Rekomendasi:** tulis satu baris eksplisit di kedua dokumen: *"Untuk pemecahan subphase dan Definition of Complete per-subphase, EXECUTION_PHASES_REV5 adalah rujukan tunggal. ROADMAP hanya mengatur protokol commit/checkpoint/git."* Atau sebaliknya jika ROADMAP yang dimaksud final — tapi harus salah satu, tertulis, bukan tersirat.
+
+### 1.3 Rentang bagian PRD yang dikutip untuk phase yang sama kadang berbeda
+
+Contoh P08 (Shopee): ROADMAP menyebut "DoC Bagian 137 + 148"; EXECUTION_PHASES_REV5 menyebut "PRD: 137, 142–149". Ini bisa jadi memang cakupan baca yang lebih luas di versi Rev 5 (bukan kesalahan), tapi karena PRD tidak tersedia untuk dicek, ini masuk kategori "tidak terverifikasi" — tandai sebagai risiko kecil, bukan bug pasti.
+
+---
+
+## 2. HAL YANG SUDAH KUAT (tidak perlu diubah)
+
+Untuk konteks, supaya audit ini seimbang — desain proses di kedua dokumen ini sudah menutup banyak celah klasik "AI ngaku selesai padahal belum":
+
+- **Definisi "Complete" ketat dan berulang** di banyak level (subphase checklist literal, phase checklist literal, gate lintas-phase Bagian 31/8) — bukan sekadar "UI tampil".
+- **Larangan eksplisit** terhadap pola gagal umum: `catch { return [] }`, silent fallback, org_id dari body sebagai sumber tenant, UI query DB langsung, AI dengan privilege di atas user, data marketplace/AI dikarang.
+- **Urutan implementasi wajib** (Contract → Schema → Domain → API → UI → Events → Tests → Observability → Docs) diterapkan konsisten di semua 25 phase, bukan cuma disebut sekali di depan.
+- **Adapter boundary** (Queue/Cache/Storage/Realtime/Lock/Notification) untuk shared-hosting-first lalu P25 sebagai cloud migration yang di-trigger, bukan dipaksakan lebih awal — ini pola yang secara teknis realistis untuk hindari over-engineering dini.
+- **Checkpoint ide** dengan aturan "berhenti dan tunggu keputusan pengguna" sebelum menambah scope — mencegah scope creep otomatis oleh Replit AI.
+- **Gate P12 (accounting) diberi toleransi nol** secara eksplisit dan disebut berulang di phase-phase turunannya (P13, P14, P23) — konsisten.
+- **Konektor marketplace** (P08–P11) semuanya mewajibkan raw payload preservation + replay + "unsupported ditampilkan sebagai unsupported, bukan sukses kosong" — ini pola anti-mock yang bagus, khususnya untuk API pihak ketiga yang capability-nya tidak lengkap.
+- **Push GitHub** punya aturan jujur soal kegagalan ("jangan mengarang keberhasilan... laporkan error persis") — konsisten di kedua dokumen.
+
+---
+
+## 3. GAP FUNGSIONAL YANG TIDAK TERLIHAT DI KEDUA DOKUMEN
+
+Ini bukan bug (karena PRD tidak tersedia untuk dicek apakah sudah disebut di sana), tapi celah yang lazim untuk SaaS produksi dan tidak muncul eksplisit di roadmap manapun:
+
+| Area | Status di kedua dokumen |
+|---|---|
+| **Forgot password / reset password via email** | P01.3 hanya menyebut signup/login/logout/refresh rotation. Tidak ada subphase eksplisit untuk password-reset flow, padahal ini fitur P0 standar untuk auth produksi. |
+| **Consent/persetujuan ToS & Privacy Policy saat signup** | P24.3 hanya menyebut "Trust/ToS" sebagai bagian dari hardening akhir, bukan sebagai flow yang diimplementasikan dan diaudit (versioned consent, timestamp acceptance). Untuk aplikasi yang menyimpan PII pelanggan dan data keuangan, ini biasanya harus ada sejak onboarding (P02), bukan disinggung sekilas di P24. |
+| **Kepatuhan UU PDP (Indonesia)** | Tidak disebut sama sekali di kedua dokumen, meski sistem menyimpan PII pelanggan, data settlement, dan koneksi marketplace. Ada "PII access audit" tapi tidak ada subphase kepatuhan regulasi data privasi Indonesia. |
+| **Pembayaran nyata untuk billing (P21)** | P21.1 eksplisit: *"payment provider only when explicitly selected and connected. Core entitlement must work without inventing a provider."* Artinya sistem bisa mencapai GA (P24) tanpa pernah benar-benar mengintegrasikan payment gateway sungguhan — plan Growth/Business/Enterprise berbayar secara struktural ada, tapi cara menagihnya secara nyata tidak wajib selesai sebelum GA. Ini keputusan bisnis yang sah, tapi harus disadari: "Billing complete" di roadmap ini ≠ "bisa menagih uang sungguhan". |
+| **Rate-limit/anti-abuse di luar auth & API dasar** | Ada 20/min (auth) dan 120/min (API default) serta rate limit publik API P23. Tidak ada penyebutan captcha/bot-protection untuk signup publik atau brute-force lockout account (di luar rate limit generik). |
+
+---
+
+## 4. RINGKASAN KONSISTENSI SILANG (SPOT-CHECK)
+
+Saya cek konsistensi dependency graph, nama gate, dan pesan commit untuk seluruh 26 phase (P00–P25) antara kedua dokumen. Hasilnya:
+
+- **Nama phase, urutan P00→P25, dan pesan commit `feat(phase-XX): ...`** — identik di kedua dokumen untuk semua phase yang saya cek (P00, P01, P05, P08, P09, P12, P16, P17, P21, P24, P25). Ini sinyal bagus: kedua dokumen berasal dari sumber yang sama dan tidak bercabang secara strategis.
+- **Dependency graph tekstual (Bagian 6 ROADMAP vs Bagian 4 EXECUTION_PHASES_REV5)** — cocok di semua baris **kecuali** bug label P15/P16 yang dijelaskan di 1.1.
+- **Trigger P25 (cloud migration)** — angka threshold (>3.000 order/bulan, >50 tenant aktif, DB connection >70%) identik di kedua dokumen. Konsisten.
+- **Aturan Tokopedia+TikTok = satu connector, dua channel billing** — konsisten disebut di ROADMAP Bagian 2, P09, P21; dan di EXECUTION_PHASES_REV5 P09, P21. Konsisten.
+
+---
+
+## 5. JAWABAN LANGSUNG ATAS PERTANYAAN ANDA
+
+> "apakah fase sudah betul-betul dapat membangun sistem sesuai dengan PRD dengan lengkap, real work, completed"
+
+- **Sebagai proses/metodologi:** Ya, kerangka ini di atas rata-rata untuk mencegah kerja palsu — definisi "Complete" berlapis, larangan mock eksplisit, gate lintas-phase yang berulang, dan protokol checkpoint yang memaksa jeda sebelum scope membesar sendiri.
+- **Sebagai kepastian "lengkap sesuai PRD":** Tidak bisa dipastikan tanpa PRD itu sendiri di tangan saya. Semua klaim cakupan modul ("tidak ada modul PRD yang tidak terpetakan") adalah klaim internal dokumen, belum diverifikasi silang.
+- **Ada 1 bug konkret** (label P15/P16 tertukar di ROADMAP Bagian 6) dan **1 risiko struktural nyata** (dua dokumen dengan breakdown subphase berbeda tanpa aturan presedensi) yang sebaiknya diperbaiki sebelum dipakai sebagai instruksi operasional ke Replit AI — karena keduanya bisa menyebabkan phase dinyatakan "Complete" secara prematur atau salah paham dependency saat dieksekusi.
+- **3 gap fungsional** (password reset, consent/ToS terstruktur, kepatuhan UU PDP) tidak muncul eksplisit di kedua dokumen dan layak dicek terhadap PRD asli — kemungkinan besar ini memang ada di PRD tapi belum dipetakan ke phase manapun, atau memang belum ada di PRD sama sekali.
+
+---
+
+## 6. LANGKAH SELANJUTNYA YANG DISARANKAN
+
+1. Upload `AutoProfit_PRD_Master_Rev5.md` agar audit cakupan modul PRD-vs-phase bisa dilakukan secara literal, bukan berdasarkan klaim dokumen turunan.
+2. Perbaiki diagram Bagian 6 ROADMAP (P15/P16 tertukar).
+3. Tuliskan satu kalimat presedensi eksplisit: dokumen mana yang menjadi rujukan subphase final antara ROADMAP dan EXECUTION_PHASES_REV5.
+4. Konfirmasi apakah password-reset flow, consent/ToS versioning, dan kepatuhan UU PDP sudah ada di PRD tapi belum dipetakan, atau memang belum didefinisikan sama sekali.
