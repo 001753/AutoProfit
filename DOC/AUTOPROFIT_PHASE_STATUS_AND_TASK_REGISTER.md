@@ -1,6 +1,6 @@
 # AUTOPROFIT — PHASE STATUS DAN TASK REGISTER
 
-**Versi:** 1.0  
+**Versi:** 1.1
 **Tanggal pemeriksaan:** 2026-08-11  
 **Sumber otoritatif:** `DOC/AutoProfit_PRD_Master_Rev5.md`  
 **Urutan dan delivery control:** `DOC/AUTOPROFIT_BUILD_ROADMAP.md`  
@@ -37,6 +37,10 @@ bukti bahwa P00 atau phase pembangunan lainnya telah selesai.
 - **Phase belum dilakukan:** P01–P25, dengan blocker/dependency khusus yang
   dijelaskan pada register di bawah.
 - **Kode aplikasi:** belum ada. Repository masih documentation-only.
+- **Commercial Validation & Moat Track:** C0–C4 belum dilakukan; belum ada
+  interview/observasi, design partner, pilot 30 hari, usage/retention evidence,
+  atau market evidence pack yang dapat diverifikasi. Track ini berjalan paralel
+  dan bukan Phase 26.
 - **Aturan penting:** task yang berstatus Drafts/Active/Ready pada panel tidak
   sama dengan phase yang complete. Phase hanya complete setelah DoC blueprint dan
   delivery gate roadmap terpenuhi.
@@ -72,7 +76,49 @@ bukti bahwa P00 atau phase pembangunan lainnya telah selesai.
 | P24 | Security, performance, UAT, release candidate, GA | **Belum dilakukan / BLOCKED** | Tidak ada aplikasi, regression suite, load/security result, restore evidence, atau UAT. | Menunggu P00–P23. Tidak boleh menjadi tempat menambal fitur yang tertinggal. | Task #26 (Drafts) |
 | P25 | Triggered cloud migration dan adapter swap | **Belum dilakukan / CONDITIONAL** | Belum ada cloud migration evidence dan trigger produksi belum dibuktikan tercapai. | Hanya setelah P24 dan salah satu trigger PRD 129.1 tercapai; cutover wajib punya rehearsal, checksum, rollback, dan RPO/RTO evidence. | Task #27 (Drafts) |
 
-## 5. Pemetaan task ke blueprint canonical
+## 5. Register task Commercial Validation & Moat Track
+
+Task di bawah ini adalah task paralel untuk evidence pasar dan moat. Task ini
+tidak menambah phase teknis, tidak mengubah breakdown `PXX.Y`, dan tidak dapat
+menyatakan technical phase selesai. Status awal seluruh task adalah **Belum
+dilakukan** karena repository belum memiliki implementasi maupun evidence nyata.
+
+| Task | Terikat ke phase/subphase | Output dan acceptance minimum | Status / blocker |
+|---|---|---|---|
+| C0.1 ICP dan interview protocol | P00.1; sebelum scope P02/P03 dikunci | ICP beachhead, interview guide, baseline worksheet, hipotesis willingness to pay, owner dan evidence index | Belum dilakukan; menunggu scope checkpoint |
+| C0.2 Problem observation dan baseline | P00–P01 | ≥15 wawancara, ≥5 observasi, baseline workflow, ≥3 calon design partner | Belum dilakukan; membutuhkan seller target dan consent |
+| C0.3 C0 decision | Sebelum P02/P03 beachhead readiness | Keputusan lanjutkan/persempit/pivot, perubahan hipotesis dan dampak scope | Belum dilakukan; bergantung C0.2 |
+| C1.1 First-value instrumentation | P02.4, P06.1–P06.3 | Timestamp, first traceable number, onboarding, coverage, exception, self-serve, silent-loss evidence | Belum dilakukan; bergantung jalur onboarding/import |
+| C1.2 First-value observation | P02, P06 | Target median ≤10 menit sandbox/import, live ≤30 menit, self-serve ≥80% | Belum dilakukan; target belum boleh dianggap hasil |
+| C1.3 C1 decision | P06 gate | Gate report, recovery findings, keputusan perbaikan first-value | Belum dilakukan; bergantung C1.1–C1.2 |
+| C2.1 Pilot readiness | P07, P08 | ≥3 bisnis nyata, connector nyata, import resmi, pilot protocol, consent, support/runbook | Belum dilakukan / BLOCKED bila provider atau pilot access belum tersedia |
+| C2.2 30-day commerce/profit pilot | P08–P14 | Trace profit, COGS estimated/actual, settlement exception, time saved, keputusan bisnis | Belum dilakukan; bergantung C2.1 dan pilot 30 hari |
+| C2.3 C2 decision | P12–P14 gate | Coverage ≥95%, COGS ≥90%, source reference profit 100%, time saved ≥50% atau ≥4 jam/minggu, no silent loss | Belum dilakukan; bergantung C2.2 |
+| C3.1 Habit and action instrumentation | P16, P22 | Weekly usage, active days, dashboard-to-action, alert-to-resolution, assisted decision | Belum dilakukan; event tidak boleh mengubah transaction truth |
+| C3.2 Retention and willingness-to-pay | P21, pilot cohort | Retention 8 minggu, usage-to-value, pricing/commitment evidence | Belum dilakukan; bergantung cohort berjalan dan provider bila paid collection digunakan |
+| C3.3 C3 decision | P16/P21/P22 gate | Keputusan habit/monetization dan dampak scope | Belum dilakukan; bergantung C3.1–C3.2 |
+| C4.1 GA market evidence pack | P24.5 | ≥3 profil bisnis, time-to-value, coverage, repeated usage, resolution, trust, limitations, support, paid evidence | Belum dilakukan; menunggu C0–C3 dan UAT |
+| C4.2 GA segment decision | Gate P24 | Lanjutkan/perluas, persempit, atau pivot; keputusan segment terdokumentasi | Belum dilakukan / BLOCKED; P24 tidak boleh GA tanpa evidence |
+
+### 5.1 Pemetaan task phase ke market task
+
+| Task phase | Market task wajib direview bersama |
+|---|---|
+| P00 | C0.1; C0.2 mulai bila akses seller tersedia |
+| P01 | C0.2; C0.3 sebagai scope gate sebelum beachhead readiness |
+| P02 | C1.1; template onboarding dan reachability evidence |
+| P03–P05 | Generic/extensible architecture; kebutuhan beachhead yang mengubah contract |
+| P06 | C1.1–C1.3; first-value, exception, silent-loss, portability |
+| P07–P11 | C2.1; mapping/replay/recovery moat evidence dan capability limitation |
+| P12–P15 | C2.2–C2.3; profit/COGS/source reference/reconciliation/time saved |
+| P16 | C3.1; alert-to-resolution dan repeated action |
+| P17–P20 | Evidence penggunaan hanya jika provider/consent nyata; bukan vanity metric |
+| P21–P22 | C3.1–C3.3; usage, retention, assisted decision, pricing |
+| P23 | Portability/API/multi-business tidak menggantikan market evidence |
+| P24 | C4.1–C4.2 wajib menjadi bagian gate GA |
+| P25 | Tidak memiliki market gate baru; migration evidence tidak menggantikan C4 |
+
+## 6. Pemetaan task ke blueprint canonical
 
 Setiap task phase harus mengerjakan hanya subphase yang tercantum di
 `DOC/AUTOPROFIT_EXECUTION_PHASES_REV5.md`. Ringkasan roadmap operasional tidak
@@ -90,7 +136,7 @@ boleh dipakai untuk membuat subphase alternatif.
 | P07 | P07.1–P07.4 |
 | P08–P25 | `PXX.Y` yang sesuai pada blueprint; tidak boleh menambah subphase baru tanpa change proposal |
 
-## 6. Aturan pembaruan status
+## 7. Aturan pembaruan status
 
 1. Status phase hanya berubah berdasarkan evidence, bukan berdasarkan niat,
    task dibuat, atau halaman UI yang tampil.
@@ -105,7 +151,7 @@ boleh dipakai untuk membuat subphase alternatif.
 6. Perubahan phase order, dependency, DoC, source of truth, permission,
    accounting, provider, atau schema inti harus menjadi change proposal terpisah.
 
-## 7. Audit scope
+## 8. Audit scope
 
 Pemeriksaan ini dilakukan terhadap isi repository pada 2026-08-11. Tidak ada
 kode aplikasi, dependency runtime, database schema, test suite, deployment

@@ -1,6 +1,6 @@
 # AUTOPROFIT — BLUEPRINT PHASE EKSEKUSI REV 5
 
-**Versi:** 1.2
+**Versi:** 1.3
 **Tanggal:** 2026-08-11  
 **Status:** Master execution plan untuk pembangunan bertahap  
 **Bahasa:** Bahasa Indonesia; nama teknis mengikuti PRD  
@@ -174,6 +174,36 @@ implementasinya terlihat selesai.
 - [ ] ADR/runbook/dokumen mapping diperbarui.
 - [ ] Checkpoint ide subphase ditawarkan dan jawabannya dicatat.
 
+### 3.2 Kontrak eksekusi Commercial Validation & Moat Track
+
+Track C0–C4 adalah **task track paralel**, bukan phase teknis dan bukan pengganti
+subphase `PXX.Y`. Setiap task track boleh dikerjakan tanpa membuat kode produk,
+tetapi hasilnya harus berupa evidence yang dapat diaudit dan harus disimpan di
+`docs/market-gates/` saat implementasi dimulai. Signup, demo, jumlah halaman,
+atau ketertarikan verbal saja tidak cukup untuk menyatakan market gate lulus.
+
+| Task track | Waktu/dependency | Output minimum | Acceptance gate |
+|---|---|---|---|
+| **C0.1 — ICP dan interview protocol** | Bersama P00.1; sebelum scope P02/P03 dikunci | ICP beachhead fashion/aksesoris, interview guide berbasis perilaku/kerugian, baseline worksheet, hipotesis willingness to pay | Scope dan hipotesis memiliki owner, ukuran, dan keputusan yang akan dipengaruhi |
+| **C0.2 — Problem observation dan baseline** | Setelah C0.1; paralel P00–P01 | ≥15 wawancara, ≥5 observasi workflow nyata, baseline laporan/settlement/COGS/discrepancy/keputusan tertunda | Evidence sesi tersimpan; minimal 3 seller bersedia memberi data atau mengikuti pilot |
+| **C0.3 — C0 decision** | Setelah C0.2; sebelum P02/P03 mengklaim beachhead readiness | Keputusan lanjutkan/persempit/pivot, perubahan hipotesis, dampak scope, known limitation | C0 tercatat sebagai `PASS`, `NARROW`, atau `PIVOT`; tidak boleh diklaim product-market fit |
+| **C1.1 — First-value instrumentation** | P02.4 dan P06.1–P06.3 | Timestamp signup/import, first traceable number, onboarding live, coverage, exception, self-serve, silent-loss evidence | Semua angka bersumber dari data nyata/sandbox yang ditandai, bukan dummy; data gagal map terlihat |
+| **C1.2 — First-value observation** | Setelah P02/P06 path tersedia; sebelum C1 gate | Evidence journey dan daftar failure/recovery | Median import/sandbox ≤10 menit, live first data ≤30 menit di luar delay provider, self-serve ≥80% sebagai target hipotesis |
+| **C1.3 — C1 decision** | Setelah C1.1–C1.2; sebelum pilot commerce diperluas | Gate report dan keputusan perbaikan onboarding/data path | Silent loss = 0 dan seluruh exception terlihat; target yang belum terbukti tetap `OPEN` |
+| **C2.1 — Pilot readiness** | P07–P08; setelah connector dan import resmi tersedia | Pilot protocol, consent/data handling, source-reference checklist, support/runbook | Minimal 3 bisnis nyata, minimal 1 connector nyata, dan 1 jalur import resmi siap |
+| **C2.2 — 30-day commerce/profit pilot** | P08–P14; selama ≥30 hari per bisnis | Order-to-profit trace, COGS estimated/actual, settlement exception, time-saved baseline, decision evidence | Data tidak termap menjadi exception yang dapat ditindaklanjuti; tidak ada silent loss |
+| **C2.3 — C2 decision** | Setelah C2.2 | Coverage, trust, COGS, reconciliation, dan time-saved gate report | Coverage order ≥95%, COGS terverifikasi ≥90%, source reference profit 100%, time saved ≥50% atau ≥4 jam/minggu sebagai target awal |
+| **C3.1 — Habit and action instrumentation** | P16 dan P22; event tidak boleh mengubah transaction truth | Weekly usage, active days, dashboard-to-action, alert-to-resolution, return-after-exception, assisted decision | Metric berasal dari tindakan bisnis yang dapat ditelusuri, bukan page-view/AI-count vanity metric |
+| **C3.2 — Retention and willingness-to-pay** | P21 bersama pilot berjalan; paid collection tetap mengikuti provider gate | Retention 8 minggu, usage-to-value, pricing/commitment evidence, known limitation | ≥70% weekly active cohort, retention ≥50%, dan ≥2 dari 3 pilot bersedia membayar/berkomitmen sebagai target awal |
+| **C3.3 — C3 decision** | Setelah C3.1–C3.2 | Monetization/habit decision dan scope consequence | Keputusan didukung evidence; perubahan pricing/provider capability menjadi change proposal |
+| **C4.1 — GA market evidence pack** | P24.5; setelah C0–C3 evidence direview | ≥3 profil bisnis, time-to-value, coverage, repeated usage, problem resolution, trust, limitations, support readiness, paid evidence | Evidence dapat ditelusuri ke bisnis nyata dan limitation tidak disembunyikan |
+| **C4.2 — GA segment decision** | Gate P24 | Keputusan lanjutkan/perluas, persempit, atau pivot serta dampak scope | P24 tidak boleh menyatakan GA jika market evidence belum tersedia, walaupun technical gate lulus |
+
+Setiap task C harus mempunyai scope note, evidence index, definisi metric,
+baseline/target, owner, tanggal pengukuran, limitation, dan keputusan. Bila
+provider, consent, data pilot, atau legal review belum tersedia, status task
+adalah `BLOCKED`; jangan menggantinya dengan evidence sintetis yang diklaim nyata.
+
 ---
 
 ## 4. Urutan dependency global
@@ -205,11 +235,61 @@ P06 + P13 + P16 + P17 ── P22 Analytics/Workspace
 P13 + P21 + P22 ── P23 Advanced Finance/Public API
 P00..P23 ── P24 Hardening/UAT/GA
 P24 + trigger PRD 129.1 ── P25 Cloud Migration
+
+C0.1–C0.3 ── scope gate P02/P03
+P02 + P06 ── C1.1–C1.3
+P07–P14 ── C2.1–C2.3
+P16 + P21 + P22 ── C3.1–C3.3
+C0–C3 + P24.5 ── C4.1–C4.2 (GA market gate)
 ```
 
 **Aturan penting:** setelah satu connector lolos P08 gate, connector berikutnya
 boleh dibangun paralel satu per satu. Tidak boleh membangun empat connector
 sekaligus sebelum satu contract platform terbukti.
+
+**Aturan binding market gate:** status teknis phase tetap mengikuti DoC teknis,
+tetapi setiap phase yang tercantum pada tabel berikut wajib menghasilkan atau
+memperbarui evidence market/moat sebelum task phase dinyatakan siap direview:
+
+| Phase teknis | Kewajiban evidence yang harus masuk ke task phase |
+|---|---|
+| P00.1–P01 | C0.1–C0.3: ICP, interview/observasi, baseline, design partner, dan keputusan scope |
+| P02 | C1.1: timestamp reachability, onboarding state, kategori/template beachhead, dan first-value instrumentation |
+| P03–P05 | Menjaga generic/extensible domain; tidak hard-code fashion; catat kebutuhan beachhead yang mengubah contract |
+| P06 | C1.1–C1.3: first traceable number, coverage, exception, export/portability, dan silent-loss proof |
+| P07–P11 | C2.1 dan moat connector: mapping coverage, unknown field, correction, version, replay, recovery, dan limitation |
+| P12–P13 | C2.2: source reference profit, estimated-vs-actual COGS, traceability, dan costing evidence |
+| P14–P15 | C2.2: reconciliation exception/resolution, time saved, dan keputusan stok/pembelian/harga |
+| P16 | C3.1: alert-to-resolution, repeated action, dan reliability evidence tanpa mengubah transaction truth |
+| P17–P20 | Evidence penggunaan/keputusan hanya bila provider dan consent nyata tersedia; AI/WhatsApp count bukan market proof |
+| P21–P22 | C3.1–C3.3: weekly usage, active days, assisted decisions, retention, pricing, dan willingness to pay |
+| P23 | Portability, public API, dan multi-business tidak boleh dipakai sebagai bukti market fit tanpa evidence C0–C3 |
+| P24 | C4.1–C4.2 wajib menjadi bagian Gate P24; technical/security/UAT lulus tidak cukup untuk GA |
+
+### 4.1 Pemetaan market evidence ke task canonical
+
+Task `PXX.Y` yang berada pada tabel berikut wajib memperbarui evidence market
+track terkait sebelum task dinyatakan siap direview. Evidence ini melengkapi,
+bukan menggantikan, acceptance proof teknis pada setiap subphase.
+
+| Task canonical | Market evidence minimum |
+|---|---|
+| P00.1 | C0.1: ICP, interview guide, baseline worksheet, evidence index, dan hipotesis yang memiliki owner |
+| P00.2–P01.4 | C0.2–C0.3 bila data seller tersedia: interview/observasi, ≥3 calon design partner, dan keputusan scope |
+| P02.4 | C1.1: timestamp reachability, kategori/template beachhead, onboarding state, dan batas synthetic/sandbox |
+| P06.1–P06.4 | C1.1–C1.3: first traceable number, data coverage, exception, portability, recovery, dan silent-loss proof |
+| P07.1–P11.3 | C2.1 serta moat connector: mapping coverage, unknown field, correction, version, replay, recovery, dan limitation |
+| P12.1–P13.4 | C2.2: source reference profit, estimated-vs-actual COGS, traceability, dan time-saved baseline |
+| P14.1–P15.4 | C2.2–C2.3: discrepancy reason/status, resolution time, dan keputusan stok/pembelian/harga |
+| P16.1–P16.4 | C3.1: repeated action, alert-to-resolution, dan reliability evidence |
+| P17.1–P20.3 | Hanya evidence penggunaan/keputusan dari provider dan consent nyata; jumlah AI/WhatsApp bukan market proof |
+| P21.1–P22.4 | C3.1–C3.3: weekly usage, active days, assisted decisions, retention, pricing, dan willingness to pay |
+| P24.5 | C4.1–C4.2: market evidence pack dan keputusan lanjutkan/persempit/pivot |
+
+Jika market evidence belum dapat diambil karena seller, provider, consent, atau
+legal review belum tersedia, task mencatat status evidence `OPEN` atau `BLOCKED`
+dengan alasannya. Task teknis tidak boleh mengisi kekosongan tersebut dengan
+data sintetis yang diklaim sebagai hasil pasar.
 
 ---
 
@@ -230,7 +310,8 @@ queue/lock/adapter boundary terbukti; ADR dan runbook awal ada.
   ADR index, decision log template.
 - **Out-of-scope:** framework pilihan baru, feature bisnis, cloud provisioning.
 - **Proof:** seluruh modul PRD 1–164 terpetakan; conflict/assumption register
-  ditulis; markdown/link check lulus.
+  ditulis; C0.1 menghasilkan ICP, interview guide, baseline worksheet, dan
+  evidence index; markdown/link check lulus.
 - **Integration:** menjadi input semua subphase berikutnya.
 
 ### P00.2 — Architecture decisions dan continuity baseline (F)
@@ -1092,8 +1173,9 @@ belum complete.
 - At least three real-business profiles, mobile/browser/a11y smoke, release
   notes, known limits, support/onboarding material, rollback decision.
 - **Gate P24:** all PRD DoC 134–139, 137/148, NFR/testing/reachability/
-  continuity dan privacy/data-governance evidence; user sign-off. Paid billing
-  hanya boleh disebut enabled bila provider dipilih, webhook tervalidasi,
+  continuity dan privacy/data-governance evidence; user sign-off; C4.1–C4.2
+  market evidence pack dan keputusan segment lulus. Paid billing hanya boleh
+  disebut enabled bila provider dipilih, webhook tervalidasi,
   entitlement-to-invoice mapping dan reconciliation terbukti; tanpa provider,
   hanya entitlement/metering/trial yang boleh dinyatakan Complete.
 - **Checkpoint/push:** ide khusus GA; commit
@@ -1260,22 +1342,24 @@ stack serta adapter boundary yang ada.
 Sebelum coding:
 1. tulis scope note, out-of-scope, domain/API/UI contract, migration plan,
    integration map, test plan, dan observability plan;
-2. jika dependency belum Complete, berhenti dan laporkan BLOCKED.
+2. identifikasi market-task C0–C4 yang terikat pada [PXX.Y] di bagian 4.1;
+3. jika dependency atau evidence market wajib belum tersedia, berhenti dan
+   laporkan BLOCKED/OPEN dengan alasannya.
 
 Saat coding:
-3. ikuti Contract → Schema → Domain/Application → API → UI → Events/Jobs;
-4. gunakan tenant context dari session/claims, permission, transaction,
+4. ikuti Contract → Schema → Domain/Application → API → UI → Events/Jobs;
+5. gunakan tenant context dari session/claims, permission, transaction,
    idempotency, audit, adapter, retry/recovery sesuai scope;
-5. tidak boleh ada mock/hardcode/silent fallback pada production path;
-6. implementasikan loading, empty, success, partial, error, mobile, desktop,
+6. tidak boleh ada mock/hardcode/silent fallback pada production path;
+7. implementasikan loading, empty, success, partial, error, mobile, desktop,
    keyboard, dan accessibility state yang relevan.
 
 Sebelum menyatakan selesai:
-7. jalankan build, typecheck, lint, migration dari DB kosong dan representative,
+8. jalankan build, typecheck, lint, migration dari DB kosong dan representative,
    unit, integration, contract, E2E/smoke, serta gate khusus;
-8. perbaiki failure dalam scope dan jangan memindahkannya ke phase berikutnya;
-9. perbarui .env.example, ADR, runbook, dan evidence;
-10. tampilkan CHECKPOINT IDE khusus subphase, lalu berhenti menunggu keputusan.
+9. perbaiki failure dalam scope dan jangan memindahkannya ke phase berikutnya;
+10. perbarui .env.example, ADR, runbook, dan evidence market-task terkait;
+11. tampilkan CHECKPOINT IDE khusus subphase, lalu berhenti menunggu keputusan.
 
 Jangan membuat credential marketplace, payment provider, WhatsApp delivery,
 AI result, atau data bisnis palsu. Sandbox/mock hanya untuk test dan harus
