@@ -1,6 +1,6 @@
 # AUTOPROFIT — BLUEPRINT PHASE EKSEKUSI REV 5
 
-**Versi:** 1.1
+**Versi:** 1.2
 **Tanggal:** 2026-08-11  
 **Status:** Master execution plan untuk pembangunan bertahap  
 **Bahasa:** Bahasa Indonesia; nama teknis mengikuti PRD  
@@ -193,12 +193,12 @@ P00 Foundation
                    └─ P11 Blibli
 
 P05 + P07..P11 ── P12 Accounting ── P13 Profit/Cash/Reports
-                                      ├─ P14 Reconciliation
-                                      └─ P15 Purchasing
+                                       ├─ P14 Reconciliation
+                                       └─ P15 Purchasing
 P06 ── P16 Notification/Automation
 P13 + P16 ── P17 AI Read-only
 P17 + P15 + P16 + P12/P13 ── P18 AI Actions/Memory
-P06 + P16 ── P19 WhatsApp P0
+P06 + P16 ── P19 WhatsApp P0 (parallel; tidak menunggu P17/P18)
 P19 + P17 + P18 + P15/P12 ── P20 WhatsApp P1/P2
 P01 + P06 ── P21 Billing/Metering/Flags
 P06 + P13 + P16 + P17 ── P22 Analytics/Workspace

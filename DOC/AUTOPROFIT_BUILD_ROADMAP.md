@@ -1,6 +1,6 @@
 # AUTOPROFIT — BUILD ROADMAP OPERASIONAL
 
-**Versi:** 1.1
+**Versi:** 1.2
 **Tanggal penyusunan:** 2026-08-11  
 **Status:** Execution roadmap — diturunkan dari `DOC/AutoProfit_PRD_Master_Rev5.md`  
 **Bahasa kerja:** Bahasa Indonesia; nama teknis, endpoint, event, dan status mengikuti PRD  
@@ -231,34 +231,39 @@ Sebuah phase Complete hanya jika:
 ## 6. MATRiks PHASE DAN DEPENDENCY
 
 ```text
-P00 Delivery control & deployment skeleton
+P00 Foundation
  └─ P01 Identity, tenant & authorization
      ├─ P02 UX shell, PWA & onboarding
      └─ P03 Catalog & product
-         ├─ P04 Customer & orders
-         │   └─ P05 Inventory & warehouse
-         │       └─ P06 Dashboard, import & portability
-         │           └─ P07 Connector platform & raw payload
-         │               ├─ P08 Shopee connector
-         │               ├─ P09 Tokopedia+TikTok Shop connector
-         │               ├─ P10 Lazada connector
-         │               └─ P11 Blibli connector
-         └─ P12 Accounting core
-             └─ P13 Profit, cash & financial reports
-                 └─ P14 Settlement & bank reconciliation
- P05 + P13 ────────────────────────────────┘
- P06 ── P16 Notification & automation
- P13 ── P15 Purchasing & supplier
- P13 + P16 ── P17 AI read-only copilot
- P17 + P15 + P16 + P12/P13 ── P18 AI action layer & business memory
- P06 + P16 ── P19 WhatsApp P0
- P19 + P17 + P18 + P15/P12 ── P20 WhatsApp approval/assistant
- P01 + P06 ── P21 Billing, plans & feature flags
- P06 + P13 + P16 + P17 ── P22 Analytics & advanced workspace
- P13 + P21 + P22 ── P23 Advanced finance, multi-business & public API
- P00–P23 ── P24 Security, performance, UAT & GA
- P24 + threshold Bagian 129.1 ── P25 Cloud migration
+         └─ P04 Customer & orders
+             └─ P05 Inventory & warehouse
+                 └─ P06 Dashboard, import & portability
+                     └─ P07 Connector platform & raw payload
+                         ├─ P08 Shopee connector
+                         ├─ P09 Tokopedia+TikTok Shop connector
+                         ├─ P10 Lazada connector
+                         └─ P11 Blibli connector
+
+P05 + P07..P11 ── P12 Accounting core ── P13 Profit, cash & financial reports
+                                      ├─ P14 Settlement & bank reconciliation
+                                      └─ P15 Purchasing & supplier
+P06 ── P16 Notification & automation
+P13 + P16 ── P17 AI read-only copilot
+P17 + P15 + P16 + P12/P13 ── P18 AI action layer & business memory
+P06 + P16 ── P19 WhatsApp P0 (jalur paralel; tidak menunggu P17/P18)
+P19 + P17 + P18 + P15/P12 ── P20 WhatsApp approval/assistant
+P01 + P06 ── P21 Billing, plans & feature flags
+P06 + P13 + P16 + P17 ── P22 Analytics & advanced workspace
+P13 + P21 + P22 ── P23 Advanced finance, multi-business & public API
+P00–P23 ── P24 Security, performance, UAT & GA
+P24 + threshold Bagian 129.1 ── P25 Cloud migration
 ```
+
+Graph di atas adalah graph dependency, bukan urutan antrean tunggal. Cabang yang
+tidak saling bergantung boleh berjalan paralel setelah dependency-nya lulus.
+Khusus P19, implementasi P0 boleh dimulai setelah P06 dan P16 lulus, meskipun
+P17–P18, P21, dan P22 belum selesai. Detail subphase dan acceptance tetap
+mengikuti blueprint canonical.
 
 P25 dapat mulai lebih awal sebagai persiapan, tetapi cutover production hanya boleh dilakukan saat trigger dan runbook migrasi lulus.
 
@@ -653,6 +658,8 @@ hijau, session/revoke E2E hijau, no critical dependency audit.
 
 ## P12 — ACCOUNTING CORE DAN DOUBLE-ENTRY INTEGRITY
 
+**Dependency:** P05, P07–P11 contracts, P06 read model.
+
 **Ini gate paling ketat. P14, tax, dan financial reporting lanjutan tidak boleh menganggap P12 selesai sebelum semua item lulus.**
 
 ### P12.1 — COA, period, journal, ledger
@@ -732,6 +739,8 @@ hijau, session/revoke E2E hijau, no critical dependency audit.
 
 ## P15 — PURCHASING, SUPPLIER, REORDER, DAN APPROVAL
 
+**Dependency:** P05, P12, P13.
+
 ### P15.1 — Supplier and supplier analytics
 
 - Supplier, terms, lead time, score, history, spend/performance metrics.
@@ -753,6 +762,8 @@ hijau, session/revoke E2E hijau, no critical dependency audit.
 ---
 
 ## P16 — NOTIFICATION CENTER DAN AUTOMATION ENGINE
+
+**Dependency:** P06; P05/P07/P13/P14/P15 sebagai producer event bila tersedia.
 
 ### P16.1 — Notification center and channels
 
@@ -804,6 +815,8 @@ hijau, session/revoke E2E hijau, no critical dependency audit.
 
 ## P18 — AI ACTION LAYER DAN BUSINESS MEMORY
 
+**Dependency:** P17, P15, P16, P12/P13.
+
 ### P18.1 — Tool risk registry
 
 - Risk 0 read, risk 1 draft, risk 2 confirmation, risk 3 approval role.
@@ -851,6 +864,8 @@ hijau, session/revoke E2E hijau, no critical dependency audit.
 
 ## P20 — WHATSAPP P1/P2: APPROVAL DAN ASSISTANT ACTION
 
+**Dependency:** P19 dengan bukti 30 hari, P17, P18, P15/P12.
+
 ### P20.1 — Interactive approval
 
 - Approve/reject PO nilai kecil sesuai role/limit.
@@ -872,6 +887,8 @@ hijau, session/revoke E2E hijau, no critical dependency audit.
 
 ## P21 — BILLING, PLANS, METERING, DAN FEATURE FLAGS
 
+**Dependency:** P01, P06; payment provider hanya bila dipilih dan terhubung.
+
 ### P21.1 — Plan/entitlement
 
 - Starter gratis, Growth, Business, Enterprise; limits dari PRD.
@@ -881,7 +898,8 @@ hijau, session/revoke E2E hijau, no critical dependency audit.
 ### P21.2 — Usage metering
 
 - orders_this_period, channels, users, automation, AI usage.
-- Reset billing period, >80% warning, overage tetap process dan ditagih add-on.
+- Reset billing period, >80% warning, overage tetap diproses dan dicatat sebagai
+  penggunaan/add-on; penagihan uang nyata hanya berjalan bila provider aktif.
 - Trial 14 hari Growth tanpa kartu; payment provider hanya jika dipilih/terhubung.
 
 ### P21.3 — Admin/pricing UX dan feature flags
@@ -901,6 +919,8 @@ stop order, no plan bypass via API, billing event audit.
 ---
 
 ## P22 — ANALYTICS, SAVED VIEWS, CUSTOM DASHBOARD, BULK, DOCUMENT
+
+**Dependency:** P06, P13, P16, P17.
 
 ### P22.1 — Analytics taxonomy dan North Star
 
@@ -927,6 +947,8 @@ stop order, no plan bypass via API, billing event audit.
 
 ## P23 — ADVANCED FINANCE, MULTI-BUSINESS, MULTI-CURRENCY, TAX, PUBLIC API
 
+**Dependency:** P13, P21, P22; legal/product review wajib untuk klaim pajak.
+
 ### P23.1 — Multi-business membership
 
 - User switches organization safely; active tenant context visible; no cross-tenant cache/session leakage.
@@ -950,6 +972,9 @@ stop order, no plan bypass via API, billing event audit.
 ---
 
 ## P24 — SECURITY, PERFORMANCE, UAT, RELEASE CANDIDATE, DAN GA
+
+**Dependency:** P00–P23. P24 tidak boleh dipakai untuk menyelesaikan fitur yang
+belum Complete.
 
 Ini bukan tempat menambal modul yang belum selesai. P24 hanya melakukan hardening dan membuktikan semua gate.
 
@@ -988,6 +1013,10 @@ Ini bukan tempat menambal modul yang belum selesai. P24 hanya melakukan hardenin
 **Gate P24:** all PRD P0 DoC 134–139, marketplace 137/148, testing 120,
 NFR 119/128, reachability target evidence, continuity artifacts, privacy/
 data-governance evidence, dan tidak ada unresolved critical/high finding.
+Paid billing hanya boleh disebut enabled bila provider dipilih, webhook
+signature/idempotency tervalidasi, mapping entitlement-to-invoice dan
+reconciliation terbukti; tanpa provider, yang boleh dinyatakan Complete hanya
+entitlement, metering, dan trial.
 **Push:** `feat(phase-24): complete hardening and GA readiness`.
 
 ---
