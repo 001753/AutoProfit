@@ -1,8 +1,7 @@
 # P00.1 — Product baseline dan source-of-truth map
 
 **Classification:** Foundation (`F`)  
-**Status:** `IN_PROGRESS` until the validation gate and checkpoint decision are
-recorded  
+**Status:** `PASS` for the documentation scope; P00.2–P00.4 remain open  
 **Owner:** Engineering lead / product owner (to be assigned)  
 **Date:** 2026-08-11
 
@@ -106,7 +105,8 @@ dan path file, bukan secret atau PII.
 - [x] C0.1 pack tersedia tanpa fabricated evidence.
 - [x] Runbook continuity templates tersedia.
 - [x] Markdown/link/coverage validator tersedia.
-- [ ] Checkpoint ide P00.1 ditawarkan dan keputusan pengguna dicatat.
+- [x] Checkpoint ide P00.1 ditawarkan; keputusan pengguna: **lanjut tanpa
+  perubahan**, kemudian lanjut ke P00.2–P00.4 sesuai blueprint.
 
 ## Done evidence
 

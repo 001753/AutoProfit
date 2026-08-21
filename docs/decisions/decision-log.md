@@ -33,3 +33,14 @@ must also have an ADR or change proposal as required by the roadmap.
   out-of-scope for P00.1.
 - **Consequence:** There is no app start command or runtime smoke yet.
 - **Revisit trigger:** Start of P00.2.
+
+### DEC-2026-08-21-002 — Continue without P00.1 scope additions
+
+- **Status:** ACCEPTED
+- **Owner:** Project owner
+- **Context:** The P00.1 checkpoint requires an explicit decision before the
+  next subphase.
+- **Decision:** Continue without adding checkpoint ideas; start P00.2 and
+  proceed through P00.4 before attempting P01.
+- **Consequence:** Runtime, database, and adapter work must remain inside the
+  canonical P00.2–P00.4 scope.

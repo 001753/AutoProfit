@@ -13,6 +13,7 @@
 | CA-006 | “Complete” meaning | A document or UI existing is not enough; gate evidence and checkpoint are mandatory | Blueprint §1.1/§3.1 | RESOLVED | Use DoC checklist |
 | CA-007 | Runtime selection | No framework/runtime is selected by P00.1; choose and verify it in P00.2 | Blueprint P00.2 | OPEN | Engineering lead at P00.2 |
 | CA-008 | Product owner | No owner/contact is present in the imported repository | Repository inspection | OPEN | User assigns owner before C0 sessions |
+| CA-009 | ADR timing | Roadmap summary asks for all Phase 0 ADRs in P00.1, while the canonical blueprint assigns concrete infrastructure ADRs to P00.2 | Blueprint P00.1/P00.2 vs roadmap P00.1 | RESOLVED | P00.1 records the conflict; P00.2 owns concrete infrastructure ADRs, while P00.1 owns the ADR index/template |
 
 ## Assumptions that are explicitly forbidden
 
@@ -21,3 +22,5 @@
 - Do not add a package/framework to make P00.1 look like an application.
 - Do not use hardcoded marketplace, profit, inventory, or accounting numbers.
 - Do not mark C0/P00/Phase 01/Phase 1 complete from this document set alone.
+- Do not treat the P00.1 ADR index as evidence that P00.2 infrastructure
+  decisions have already been implemented.

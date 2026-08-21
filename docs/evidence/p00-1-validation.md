@@ -2,11 +2,13 @@
 
 **Command:** `python scripts/validate_p001.py`  
 **Expected result:** `P00.1 validation passed`  
-**Last run:** 2026-08-11T11:12:57+00:00
+**Last run:** 2026-08-21 (documentation gate)
 
 ```text
 P00.1 validation passed (artifacts=18, prd_rows=164, links=0, market_evidence=OPEN)
 ```
+
+Checkpoint decision: `lanjut tanpa perubahan`; proceed to P00.2–P00.4.
 
 The validator checks:
 
