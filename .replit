@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 modules = ["python-base-3.13", "nodejs-24"]
 [nix]
 channel = "stable-25_05"
@@ -12,6 +13,17 @@ externalPort = 5000
 [[ports]]
 localPort = 5123
 externalPort = 80
+=======
+modules = ["nodejs-24"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+>>>>>>> origin/main
 
 [workflows]
 runButton = "Project"
@@ -23,16 +35,41 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
+<<<<<<< HEAD
 args = "Start application"
 
 [[workflows.workflow]]
 name = "Start application"
+=======
+args = "AutoProfit API"
+
+[[workflows.workflow]]
+name = "AutoProfit API"
+>>>>>>> origin/main
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
+<<<<<<< HEAD
 args = "npm start"
+=======
+args = "pnpm --filter @workspace/api-server run dev"
+>>>>>>> origin/main
 waitForPort = 5000
 
 [workflows.workflow.metadata]
 outputType = "webview"
+<<<<<<< HEAD
+=======
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[nix]
+channel = "stable-25_05"
+>>>>>>> origin/main

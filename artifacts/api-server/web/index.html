@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AutoProfit design-system specimen">
+  <title>AutoProfit — P02.1 Design System</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="wordmark" href="/" aria-label="AutoProfit, beranda">
+        <span class="wordmark-mark" aria-hidden="true">A</span>
+        <span>AutoProfit</span>
+      </a>
+      <div class="header-meta">
+        <span class="version">P02.1 <span aria-hidden="true">/</span> Specimen</span>
+        <button class="button button-quiet button-small" type="button" data-action="toggle-theme" aria-pressed="false">Mode tenang</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="intro section-wrap" aria-labelledby="page-title">
+      <div class="eyebrow">Foundation / 02.1</div>
+      <h1 id="page-title">Tenang untuk dilihat.<br><em>Tepat untuk dipakai.</em></h1>
+      <p class="intro-copy">Sistem visual AutoProfit dibuat untuk membantu pemilik usaha kecil Indonesia bekerja dengan data commerce secara jernih, terukur, dan percaya diri.</p>
+      <div class="intro-note"><span class="signal-dot" aria-hidden="true"></span><span>Specimen aktif · semua komponen di bawah siap dipakai</span></div>
+    </section>
+
+    <div class="layout section-wrap">
+      <aside class="toc" aria-label="Daftar bagian">
+        <p class="toc-label">Dalam sistem ini</p>
+        <nav>
+          <a class="toc-link active" href="#tokens">Tokens</a>
+          <a class="toc-link" href="#controls">Controls</a>
+          <a class="toc-link" href="#surfaces">Surfaces</a>
+          <a class="toc-link" href="#feedback">Feedback</a>
+          <a class="toc-link" href="#accessibility">Aksesibilitas</a>
+        </nav>
+        <p class="breakpoint-readout"><span class="readout-dot"></span><span id="breakpoint-label">Breakpoint: 1024–1440</span></p>
+      </aside>
+
+      <div class="content">
+        <section id="tokens" class="spec-section" aria-labelledby="tokens-title">
+          <div class="section-heading"><div><div class="eyebrow">01 / Visual language</div><h2 id="tokens-title">Tokens yang terasa manusiawi</h2></div><span class="section-index">AP—01</span></div>
+          <div class="token-grid">
+            <article class="token-card token-type">
+              <div class="card-kicker">Typography</div>
+              <div class="type-display">Clarity<br>over noise.</div>
+              <div class="type-meta"><span>Plus Jakarta Sans</span><span>Instrument Serif</span></div>
+            </article>
+            <article class="token-card token-color">
+              <div class="card-kicker">Color / semantic</div>
+              <div class="swatches"><span class="swatch swatch-ink"><b>Ink</b><small>#1D2A2C</small></span><span class="swatch swatch-paper"><b>Canvas</b><small>#F6F5F0</small></span><span class="swatch swatch-teal"><b>Signal</b><small>#146B68</small></span><span class="swatch swatch-amber"><b>Notice</b><small>#B56B25</small></span></div>
+            </article>
+            <article class="token-card token-space">
+              <div class="card-kicker">Spacing / rhythm</div>
+              <div class="spacing-list"><span><i style="width:8px"></i><b>08</b></span><span><i style="width:16px"></i><b>16</b></span><span><i style="width:24px"></i><b>24</b></span><span><i style="width:40px"></i><b>40</b></span><span><i style="width:64px"></i><b>64</b></span></div>
+            </article>
+            <article class="token-card token-radius">
+              <div class="card-kicker">Shape / quiet confidence</div>
+              <div class="radius-samples"><span class="radius-a">12</span><span class="radius-b">20</span><span class="radius-c">pill</span></div>
+              <p>Sudut lembut memberi ruang bernapas tanpa kehilangan ketepatan.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="controls" class="spec-section" aria-labelledby="controls-title">
+          <div class="section-heading"><div><div class="eyebrow">02 / Interaction</div><h2 id="controls-title">Kontrol yang menjawab</h2></div><span class="section-index">AP—02</span></div>
+          <div class="control-layout">
+            <article class="component-panel">
+              <div class="panel-title"><span>Buttons</span><span class="component-tag">button</span></div>
+              <div class="button-stack"><button class="button button-primary" type="button" data-action="toast-success">Simpan perubahan <span aria-hidden="true">→</span></button><button class="button button-secondary" type="button" data-action="open-modal">Buka modal detail</button><button class="button button-quiet" type="button" data-action="toast-info">Pelajari pola ini <span aria-hidden="true">↗</span></button><button class="button button-danger" type="button" data-action="toast-danger">Batalkan tindakan</button></div>
+              <div class="button-row"><button class="icon-button" type="button" aria-label="Cari" data-action="toast-info">⌕</button><button class="icon-button" type="button" aria-label="Pengaturan" data-action="toast-info">⋯</button><span class="shortcut">Tab untuk fokus</span></div>
+            </article>
+            <article class="component-panel form-panel">
+              <div class="panel-title"><span>Forms</span><span class="component-tag">native controls</span></div>
+              <form id="sample-form" novalidate>
+                <label for="name">Nama tampilan <span class="required">*</span></label>
+                <input id="name" name="name" type="text" placeholder="Misalnya, Toko Harian" required>
+                <p class="helper">Gunakan nama yang mudah dikenali tim Anda.</p>
+                <label for="category">Kategori pilihan</label>
+                <select id="category" name="category"><option value="">Pilih kategori</option><option>Operasional</option><option>Keuangan</option><option>Inventaris</option></select>
+                <label class="check-row"><input type="checkbox" name="updates" checked> <span>Terima ringkasan mingguan</span></label>
+                <div class="form-actions"><button class="button button-primary button-small" type="submit">Validasi form</button><span class="form-status" id="form-status" role="status"></span></div>
+              </form>
+            </article>
+          </div>
+        </section>
+
+        <section id="surfaces" class="spec-section" aria-labelledby="surfaces-title">
+          <div class="section-heading"><div><div class="eyebrow">03 / Information</div><h2 id="surfaces-title">Permukaan untuk keputusan</h2></div><span class="section-index">AP—03</span></div>
+          <article class="data-card">
+            <div class="data-card-head"><div><div class="card-kicker">Table / default</div><h3>Daftar terstruktur</h3></div><button class="button button-secondary button-small" type="button" data-action="toast-info">Filter data</button></div>
+            <div class="table-wrap"><table><caption class="sr-only">Contoh tabel data</caption><thead><tr><th scope="col">Nama entitas</th><th scope="col">Status</th><th scope="col">Diperbarui</th><th scope="col" class="align-right">Aksi</th></tr></thead><tbody><tr><td><strong>Row pertama</strong><small>ID–0001</small></td><td><span class="status status-success"><i></i>Aktif</span></td><td>Baru saja</td><td class="align-right"><button class="table-action" type="button" data-action="toast-info">Lihat</button></td></tr><tr><td><strong>Row kedua</strong><small>ID–0002</small></td><td><span class="status status-warning"><i></i>Menunggu</span></td><td>12 menit lalu</td><td class="align-right"><button class="table-action" type="button" data-action="toast-info">Lihat</button></td></tr><tr><td><strong>Row ketiga</strong><small>ID–0003</small></td><td><span class="status status-muted"><i></i>Arsip</span></td><td>Kemarin</td><td class="align-right"><button class="table-action" type="button" data-action="toast-info">Lihat</button></td></tr></tbody></table></div>
+          </article>
+          <div class="card-row"><article class="info-card"><span class="card-icon" aria-hidden="true">↗</span><div><div class="card-kicker">Card / insight</div><h3>Ruang untuk konteks</h3><p>Gunakan kartu ketika informasi perlu dibaca sebagai satu kesatuan, bukan sekadar sel.</p></div></article><article class="info-card muted-card"><span class="card-icon" aria-hidden="true">+</span><div><div class="card-kicker">Empty state</div><h3>Mulai dari yang jelas</h3><p>Belum ada item di sini. Saat data tersedia, ia akan muncul dengan struktur yang sama.</p><button class="text-button" type="button" data-action="toast-success">Tambah item <span aria-hidden="true">→</span></button></div></article></div>
+        </section>
+
+        <section id="feedback" class="spec-section" aria-labelledby="feedback-title">
+          <div class="section-heading"><div><div class="eyebrow">04 / Feedback</div><h2 id="feedback-title">Sinyal yang tidak mengagetkan</h2></div><span class="section-index">AP—04</span></div>
+          <div class="feedback-layout"><div class="toast-demo" role="status"><span class="toast-mark">✓</span><div><strong>Perubahan tersimpan</strong><p>Semua pembaruan sudah aman.</p></div><button class="toast-close" type="button" aria-label="Tutup notifikasi" data-action="hide-toast">×</button></div><div class="status-legend"><span class="status status-success"><i></i>Sukses</span><span class="status status-warning"><i></i>Perlu perhatian</span><span class="status status-danger"><i></i>Gagal</span></div></div>
+        </section>
+
+        <section id="accessibility" class="spec-section accessibility-section" aria-labelledby="accessibility-title">
+          <div class="section-heading"><div><div class="eyebrow">05 / Inclusive by default</div><h2 id="accessibility-title">Terbaca dalam kondisi nyata</h2></div><span class="section-index">AP—05</span></div>
+          <div class="a11y-grid"><div><strong>Kontras</strong><p>Warna teks utama memenuhi WCAG AA untuk teks normal.</p></div><div><strong>Fokus</strong><p>Ring fokus teal terlihat jelas pada setiap kontrol keyboard.</p></div><div><strong>Gerak</strong><p>Animasi mengikuti preferensi reduced motion perangkat.</p></div></div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer section-wrap"><span>AutoProfit / Design system specimen</span><span>Built for calm commerce operations</span></footer>
+
+  <dialog class="modal" id="detail-modal" aria-labelledby="modal-title">
+    <div class="modal-head"><div><div class="eyebrow">Modal / detail</div><h2 id="modal-title">Konfirmasi perubahan</h2></div><button class="icon-button" type="button" aria-label="Tutup modal" data-action="close-modal">×</button></div>
+    <p>Perubahan akan diterapkan pada tampilan Anda. Anda dapat meninjaunya kembali kapan saja.</p>
+    <div class="modal-actions"><button class="button button-quiet" type="button" data-action="close-modal">Kembali</button><button class="button button-primary" type="button" data-action="confirm-modal">Konfirmasi</button></div>
+  </dialog>
+  <div class="toast-live" id="live-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
