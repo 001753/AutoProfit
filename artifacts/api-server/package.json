@@ -5,11 +5,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "export NODE_ENV=development && pnpm run build && pnpm run start",
+    "dev": "pnpm run migrate && export NODE_ENV=development && pnpm run build && pnpm run start",
     "build": "node ./build.mjs",
-    "start": "node --enable-source-maps ./dist/server.mjs",
+    "start": "pnpm run migrate && node --enable-source-maps ./dist/server.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "migrate": "tsx src/migrate.ts"
+    "migrate": "tsx src/migrate.ts",
+    "migrate:check": "tsx --eval=\"import('./src/config.ts').then(({loadConfig}) => { loadConfig(); console.log('configuration_ok') })\""
   },
   "dependencies": {
     "@workspace/api-zod": "workspace:*",
