@@ -29,6 +29,7 @@ function readToken(value) {
   const data = JSON.parse(Buffer.from(body, "base64url").toString());
   return data.exp > Math.floor(Date.now()/1000) ? data : null;
 }
+export function readRefresh(value) { const data = readToken(value); return data?.typ === "refresh" ? data : null; }
 export function issueAccess(userId, orgId, sessionId) {
   return token({ sub: userId, org: orgId, sid: sessionId, typ: "access" }, Number(process.env.JWT_ACCESS_TTL_SECONDS || 900));
 }
@@ -38,6 +39,6 @@ export function issueRefresh(userId, orgId, sessionId, tokenId) {
 export async function authenticate(req) {
   const data = readToken(req.headers.authorization?.replace(/^Bearer\s+/i, ""));
   if (!data || data.typ !== "access") return null;
-  const result = await query("select u.id, u.email, m.org_id, m.role from app_user u join membership m on m.user_id=u.id where u.id=$1 and m.org_id=$2 and u.deleted_at is null and m.deleted_at is null", [data.sub, data.org]);
+  const result = await query("select u.id, u.email, m.org_id, m.role from app_user u join membership m on m.user_id=u.id join session s on s.id=$3 and s.user_id=u.id and s.org_id=m.org_id and s.revoked_at is null where u.id=$1 and m.org_id=$2 and u.deleted_at is null and m.deleted_at is null", [data.sub, data.org, data.sid]);
   return result.rows[0] ? { ...result.rows[0], sessionId: data.sid } : null;
 }

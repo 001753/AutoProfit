@@ -26,3 +26,19 @@ create table if not exists audit_log (
   actor_user_id uuid references app_user(id), action text not null, entity_type text not null,
   entity_id uuid, before_json jsonb, after_json jsonb, source text not null, created_at timestamptz not null default now()
 );
+create table if not exists job_queue (
+  id uuid primary key default gen_random_uuid(),
+  queue_name text not null,
+  payload jsonb not null,
+  status text not null default 'pending' check (status in ('pending','processing','done','failed','dead')),
+  attempts integer not null default 0,
+  max_attempts integer not null default 3,
+  available_at timestamptz not null default now(),
+  locked_at timestamptz,
+  locked_by text,
+  last_error text,
+  created_at timestamptz not null default now(),
+  completed_at timestamptz
+);
+create index if not exists job_queue_claim_idx on job_queue(queue_name, available_at, created_at)
+  where status in ('pending','failed');

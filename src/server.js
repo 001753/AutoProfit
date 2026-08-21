@@ -1,9 +1,13 @@
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import { dbHealth, query, closeDb } from "./db.js";
-import { authenticate, hashPassword, verifyPassword, issueAccess, issueRefresh } from "./auth.js";
+import { authenticate, hashPassword, verifyPassword, issueAccess, issueRefresh, readRefresh } from "./auth.js";
+import { SseRealtimeAdapter } from "./adapters.js";
+import { enqueue } from "./queue.js";
 const port = Number(process.env.PORT || 5000);
 let lastPoll = Date.now();
+const realtime = new SseRealtimeAdapter();
+const log = (event, fields = {}) => console.log(JSON.stringify({ event, ...fields }));
 const json = (res, status, data, requestId) => { res.writeHead(status, {"content-type":"application/json","x-request-id":requestId}); res.end(JSON.stringify(data)); };
 async function body(req) { let raw=""; for await (const chunk of req) raw += chunk; return raw ? JSON.parse(raw) : {}; }
 async function handler(req, res) {
@@ -16,6 +20,24 @@ async function handler(req, res) {
     if (req.method === "GET" && req.url === "/health") {
       const db = await dbHealth(), poller = Date.now() - lastPoll < 120000;
       return json(res, db && poller ? 200 : 503, { status: db && poller ? "ok" : "degraded", database: db, scheduler: poller }, requestId);
+    }
+    if (req.method === "GET" && req.url === "/api/events") {
+      const user = await authenticate(req);
+      if (!user) return json(res, 401, {error:"unauthorized"}, requestId);
+      res.writeHead(200, {"content-type":"text/event-stream","cache-control":"no-cache","connection":"keep-alive","x-request-id":requestId});
+      res.write("event: ready\ndata: {}\n\n");
+      const unsubscribe = realtime.subscribe(`org:${user.org_id}`, res);
+      req.on("close", unsubscribe);
+      return;
+    }
+    if (req.method === "POST" && req.url === "/api/jobs") {
+      const user = await authenticate(req);
+      if (!user) return json(res, 401, {error:"unauthorized"}, requestId);
+      const input = await body(req);
+      const id = await enqueue(input.queueName || "default", { orgId: user.org_id, ...input.payload });
+      log("job_enqueued", {requestId, jobId:id, orgId:user.org_id});
+      realtime.publish(`org:${user.org_id}`, "job_queued", {id});
+      return json(res, 202, {id}, requestId);
     }
     if (req.method === "POST" && req.url === "/api/auth/signup") {
       const input = await body(req);
@@ -38,9 +60,28 @@ async function handler(req, res) {
       const s=await query("insert into session(user_id,org_id,refresh_token_id) values($1,$2,gen_random_uuid()) returning id,refresh_token_id",[found.rows[0].id,found.rows[0].org_id]);
       return json(res,200,{user:{id:found.rows[0].id,email:found.rows[0].email,role:found.rows[0].role,orgId:found.rows[0].org_id},accessToken:issueAccess(found.rows[0].id,found.rows[0].org_id,s.rows[0].id),refreshToken:issueRefresh(found.rows[0].id,found.rows[0].org_id,s.rows[0].id,s.rows[0].refresh_token_id)},requestId);
     }
+    if (req.method === "POST" && req.url === "/api/auth/refresh") {
+      const input = await body(req), claims = readRefresh(input.refreshToken);
+      if (!claims) return json(res, 401, {error:"invalid_refresh_token"}, requestId);
+      const current = await query("select id,refresh_token_id from session where id=$1 and user_id=$2 and org_id=$3 and revoked_at is null", [claims.sid, claims.sub, claims.org]);
+      if (!current.rows[0] || current.rows[0].refresh_token_id.toString() !== claims.jti) {
+        await query("update session set revoked_at=now() where user_id=$1 and org_id=$2 and revoked_at is null", [claims.sub, claims.org]);
+        return json(res, 401, {error:"refresh_reuse_detected"}, requestId);
+      }
+      const next = await query("update session set revoked_at=now() where id=$1 returning id", [claims.sid]);
+      if (!next.rows[0]) return json(res, 401, {error:"session_revoked"}, requestId);
+      const created = await query("insert into session(user_id,org_id,refresh_token_id) values($1,$2,gen_random_uuid()) returning id,refresh_token_id", [claims.sub, claims.org]);
+      return json(res, 200, {accessToken:issueAccess(claims.sub,claims.org,created.rows[0].id),refreshToken:issueRefresh(claims.sub,claims.org,created.rows[0].id,created.rows[0].refresh_token_id)}, requestId);
+    }
+    if (req.method === "POST" && req.url === "/api/auth/logout") {
+      const user = await authenticate(req);
+      if (!user) return json(res, 401, {error:"unauthorized"}, requestId);
+      await query("update session set revoked_at=now() where id=$1 and user_id=$2 and org_id=$3", [user.sessionId,user.id,user.org_id]);
+      return json(res, 200, {loggedOut:true}, requestId);
+    }
     if (req.method === "GET" && req.url === "/api/me") { const user=await authenticate(req); return user ? json(res,200,{user},requestId) : json(res,401,{error:"unauthorized"},requestId); }
     return json(res,404,{error:"not_found"},requestId);
-  } catch (error) { console.error(JSON.stringify({requestId,error:error.message})); return json(res,500,{error:"internal_error",requestId},requestId); }
+  } catch (error) { log("request_error", {requestId, error:error.message}); return json(res,500,{error:"internal_error",requestId},requestId); }
 }
 const server=createServer(handler);
 server.listen(port, "0.0.0.0", () => console.log(JSON.stringify({event:"server_started",port})));
