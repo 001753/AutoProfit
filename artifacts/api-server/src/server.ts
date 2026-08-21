@@ -111,6 +111,10 @@ export function buildApp(configOverrides: Partial<Config> = {}) {
 
   registerDesignSystemRoutes(app, basePath);
 
+  app.get("/favicon.ico", async (_request, reply) => {
+    return reply.status(204).send();
+  });
+
   app.setErrorHandler((error, request, reply) => {
     if (error instanceof ZodError) {
       return reply.status(400).send({
