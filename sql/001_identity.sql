@@ -26,6 +26,32 @@ create table if not exists audit_log (
   actor_user_id uuid references app_user(id), action text not null, entity_type text not null,
   entity_id uuid, before_json jsonb, after_json jsonb, source text not null, created_at timestamptz not null default now()
 );
+create table if not exists permission (
+  code text primary key, description text not null
+);
+create table if not exists role_permission (
+  role text not null check (role in ('Owner','Finance','Purchasing','Operations','Admin')),
+  permission_code text not null references permission(code),
+  primary key (role, permission_code)
+);
+create table if not exists consent (
+  id uuid primary key default gen_random_uuid(), user_id uuid not null references app_user(id),
+  org_id uuid not null references organization(id), policy_type text not null,
+  policy_version text not null, accepted_at timestamptz not null default now(),
+  source text not null, withdrawn_at timestamptz
+);
+insert into permission(code,description) values
+  ('job:create','Create a background job'),
+  ('session:revoke','Revoke an active session'),
+  ('organization:manage','Manage organization settings')
+on conflict (code) do nothing;
+insert into role_permission(role,permission_code)
+select role_name, permission_code from (values
+  ('Owner','job:create'),('Owner','session:revoke'),('Owner','organization:manage'),
+  ('Admin','job:create'),('Admin','session:revoke'),('Admin','organization:manage'),
+  ('Operations','job:create')
+) as seed(role_name,permission_code)
+on conflict do nothing;
 create table if not exists job_queue (
   id uuid primary key default gen_random_uuid(),
   queue_name text not null,

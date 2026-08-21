@@ -8,6 +8,10 @@ const port = Number(process.env.PORT || 5000);
 let lastPoll = Date.now();
 const realtime = new SseRealtimeAdapter();
 const log = (event, fields = {}) => console.log(JSON.stringify({ event, ...fields }));
+async function can(user, permission) {
+  const result = await query("select 1 from role_permission where role=$1 and permission_code=$2", [user.role, permission]);
+  return result.rowCount === 1;
+}
 const json = (res, status, data, requestId) => { res.writeHead(status, {"content-type":"application/json","x-request-id":requestId}); res.end(JSON.stringify(data)); };
 async function body(req) { let raw=""; for await (const chunk of req) raw += chunk; return raw ? JSON.parse(raw) : {}; }
 async function handler(req, res) {
@@ -33,6 +37,7 @@ async function handler(req, res) {
     if (req.method === "POST" && req.url === "/api/jobs") {
       const user = await authenticate(req);
       if (!user) return json(res, 401, {error:"unauthorized"}, requestId);
+      if (!(await can(user, "job:create"))) return json(res, 403, {error:"forbidden"}, requestId);
       const input = await body(req);
       const id = await enqueue(input.queueName || "default", { orgId: user.org_id, ...input.payload });
       log("job_enqueued", {requestId, jobId:id, orgId:user.org_id});
@@ -41,13 +46,14 @@ async function handler(req, res) {
     }
     if (req.method === "POST" && req.url === "/api/auth/signup") {
       const input = await body(req);
-      if (!input.email || !input.password || input.password.length < 12 || !input.organizationName) return json(res, 400, {error:"invalid_input"}, requestId);
+      if (!input.email || !input.password || input.password.length < 12 || !input.organizationName || input.termsAccepted !== true || input.privacyAccepted !== true) return json(res, 400, {error:"consent_required"}, requestId);
       const client = await (await import("./db.js")).pool.connect();
       try {
         await client.query("begin");
         const org = await client.query("insert into organization(name) values($1) returning id", [input.organizationName]);
         const user = await client.query("insert into app_user(email,password_hash) values(lower($1),$2) returning id,email", [input.email, await hashPassword(input.password)]);
         await client.query("insert into membership(user_id,org_id,role) values($1,$2,'Owner')", [user.rows[0].id, org.rows[0].id]);
+        await client.query("insert into consent(user_id,org_id,policy_type,policy_version,source) values($1,$2,'terms','2026-08-21','signup'),($1,$2,'privacy','2026-08-21','signup')", [user.rows[0].id, org.rows[0].id]);
         const session = await client.query("insert into session(user_id,org_id,refresh_token_id) values($1,$2,gen_random_uuid()) returning id,refresh_token_id", [user.rows[0].id, org.rows[0].id]);
         await client.query("insert into audit_log(org_id,actor_user_id,action,entity_type,entity_id,source) values($1,$2,'signup','organization',$1,'api')", [org.rows[0].id,user.rows[0].id]);
         await client.query("commit");
